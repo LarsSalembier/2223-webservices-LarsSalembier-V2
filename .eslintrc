@@ -1,0 +1,23 @@
+{
+  "root": true,
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2022": true
+  },
+  "extends": [
+    "airbnb-base-typescript-prettier",
+    "plugin:import/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "eslint-config-prettier",
+    "eslint:recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module",
+    "tsconfigRootDir": "./",
+    "project": "./tsconfig.json"
+  },
+  "plugins": ["import", "prettier", "@typescript-eslint"]
+}
