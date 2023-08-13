@@ -1,9 +1,13 @@
 {
   "name": "chirohouthulst-backend",
+  "author": "Lars Salembier",
   "private": true,
   "version": "0.0.1",
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "lint": "eslint --ext .ts ."
+  },
   "devDependencies": {
     "@types/koa": "^2.13.8",
     "@types/node": "^20.5.0",
@@ -14,7 +18,9 @@
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-import": "^2.28.0",
     "eslint-plugin-prettier": "^5.0.0",
+    "nodemon": "^3.0.1",
     "prettier": "^3.0.1",
+    "ts-node": "^10.9.1",
     "typescript": "^5.1.6"
   },
   "dependencies": {
