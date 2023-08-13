@@ -6,14 +6,5 @@
   "printWidth": 80,
   "bracketSpacing": true,
   "arrowParens": "always",
-  "endOfLine": "lf",
-  "overrides": [
-    {
-      "files": "*.md",
-      "options": {
-        "printWidth": 100,
-        "proseWrap": "always"
-      }
-    }
-  ]
+  "endOfLine": "lf"
 }
