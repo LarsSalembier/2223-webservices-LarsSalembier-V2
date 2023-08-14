@@ -5,7 +5,7 @@ import koaCors from '@koa/cors';
 import config from 'config';
 
 import { PersonData, StringifiedPersonData } from 'typings/Person.js';
-import Logger from './Logger.js';
+import Logger from './core/Logger.js';
 import PersonService from './service/person.js';
 
 const PORT = 9000;
