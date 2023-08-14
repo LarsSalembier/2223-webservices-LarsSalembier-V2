@@ -2,6 +2,12 @@ import winston from 'winston';
 
 const LOG_DIRECTORY = 'logs';
 
+const customFormat = winston.format.printf(
+  ({ level, message, label, timestamp }) => {
+    return `${timestamp} [${label}] ${level}: ${message}`;
+  }
+);
+
 class Logger {
   private static instance: Logger;
 
@@ -10,7 +16,11 @@ class Logger {
   private constructor() {
     this.logger = winston.createLogger({
       level: 'info',
-      format: winston.format.json(),
+      format: winston.format.combine(
+        winston.format.label({ label: 'MAIN' }),
+        winston.format.timestamp(),
+        customFormat
+      ),
       defaultMeta: { service: 'user-service' },
       transports: [
         new winston.transports.File({
