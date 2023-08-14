@@ -6,7 +6,10 @@
   "type": "module",
   "scripts": {
     "start": "nodemon src/index.ts",
-    "lint": "eslint --ext .ts ."
+    "export": "ts-node src/index.ts",
+    "build": "tsc",
+    "watch": "tsc -w",
+    "lint": "eslint . --ext .ts --cache --fix"
   },
   "devDependencies": {
     "@types/koa": "^2.13.8",
@@ -16,6 +19,7 @@
     "eslint": "^8.47.0",
     "eslint-config-airbnb-base-typescript-prettier": "^5.1.0",
     "eslint-config-prettier": "^9.0.0",
+    "eslint-import-resolver-typescript": "^3.6.0",
     "eslint-plugin-import": "^2.28.0",
     "eslint-plugin-prettier": "^5.0.0",
     "nodemon": "^3.0.1",
@@ -24,6 +28,7 @@
     "typescript": "^5.1.6"
   },
   "dependencies": {
-    "koa": "^2.14.2"
+    "koa": "^2.14.2",
+    "winston": "^3.10.0"
   }
 }
