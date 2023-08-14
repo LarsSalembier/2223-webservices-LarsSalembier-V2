@@ -5,13 +5,14 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "start": "nodemon src/index.ts",
-    "export": "ts-node src/index.ts",
+    "start": "npx env-cmd nodemon src/index.ts",
+    "export": "npx env-cmd ts-node src/index.ts",
     "build": "tsc",
     "watch": "tsc -w",
     "lint": "eslint . --ext .ts --cache --fix"
   },
   "devDependencies": {
+    "@types/config": "^3.3.0",
     "@types/koa": "^2.13.8",
     "@types/node": "^20.5.0",
     "@typescript-eslint/eslint-plugin": "^6.3.0",
@@ -28,6 +29,8 @@
     "typescript": "^5.1.6"
   },
   "dependencies": {
+    "config": "^3.3.9",
+    "env-cmd": "^10.1.0",
     "koa": "^2.14.2",
     "winston": "^3.10.0"
   }
