@@ -18,12 +18,9 @@
 
   "extends": [
     "airbnb-base-typescript-prettier",
-    "plugin:@typescript-eslint/recommended",
     "plugin:import/recommended",
     "plugin:import/warnings",
-    "plugin:import/typescript",
-    "eslint-config-prettier", // Disables ESLint rules that might conflict with Prettier.
-    "eslint:recommended"
+    "plugin:import/typescript"
   ],
 
   "plugins": ["import", "prettier", "@typescript-eslint"],

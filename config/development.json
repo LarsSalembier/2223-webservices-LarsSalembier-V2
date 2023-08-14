@@ -1,6 +1,8 @@
 {
   "log": {
     "level": "silly",
-    "enabled": true
+    "enabled": false,
+    "toFile": false,
+    "toConsole": true
   }
 }
