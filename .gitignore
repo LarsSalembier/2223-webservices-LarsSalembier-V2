@@ -130,4 +130,3 @@ build
 
 # Prisma
 dev.db*
-*.db*
