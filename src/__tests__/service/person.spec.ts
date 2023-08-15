@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import { Person } from '@prisma/client';
 import PersonService from '../../service/person.js';
 import PersonSeeder from '../../seeders/person.js';
@@ -12,6 +12,11 @@ const personService = new PersonService(prismaClient);
 
 beforeEach(async () => {
   await personService.deleteAll();
+});
+
+afterAll(async () => {
+  await personService.deleteAll();
+  await prismaClient.$disconnect();
 });
 
 describe('personService', () => {
