@@ -149,7 +149,7 @@ router.delete('/api/people/:id', async (ctx) => {
 
 app.use(router.routes()).use(router.allowedMethods());
 
-const logger = Logger.getInstance();
+const logger = Logger.getLogger();
 logger.info(`🚀 Server listening on http://localhost:9000`);
 
 app.listen(PORT);

@@ -16,6 +16,7 @@ model Article {
   content String
 }
 
+
 model Person {
   id Int @id @default(autoincrement())
   name String

@@ -24,11 +24,9 @@ const customFormat = winston.format.printf(
 );
 
 class Logger {
-  private static instance: Logger;
+  private static logger: winston.Logger = Logger.setupLogger();
 
-  private logger: winston.Logger;
-
-  private constructor() {
+  private static setupLogger(): winston.Logger {
     const transports: winston.transport[] = [];
 
     // Add file transports if logging to file is enabled
@@ -49,7 +47,7 @@ class Logger {
       transports.push(new winston.transports.Console());
     }
 
-    this.logger = winston.createLogger({
+    return winston.createLogger({
       level: LOG_LEVEL,
       format: winston.format.combine(
         winston.format.label({ label: 'MAIN' }),
@@ -61,45 +59,37 @@ class Logger {
     });
   }
 
-  public static getInstance(): Logger {
-    if (!Logger.instance) {
-      Logger.instance = new Logger();
-    }
-
-    return Logger.instance;
-  }
-
-  public log(level: LogLevel, message: string): void {
+  public static log(level: LogLevel, message: string): void {
     if (LOG_ENABLED) {
-      this.logger.log(level, message);
+      Logger.logger.log(level, message);
     }
   }
 
-  public error(message: string): void {
+  public static error(message: string): void {
     this.log(LogLevel.ERROR, message);
   }
 
-  public warn(message: string): void {
+  public static warn(message: string): void {
     this.log(LogLevel.WARN, message);
   }
 
-  public info(message: string): void {
+  public static info(message: string): void {
     this.log(LogLevel.INFO, message);
   }
 
-  public http(message: string): void {
+  public static http(message: string): void {
     this.log(LogLevel.HTTP, message);
   }
 
-  public verbose(message: string): void {
+  public static verbose(message: string): void {
     this.log(LogLevel.VERBOSE, message);
   }
 
-  public debug(message: string): void {
+  public static debug(message: string): void {
     this.log(LogLevel.DEBUG, message);
   }
 
-  public silly(message: string): void {
+  public static silly(message: string): void {
     this.log(LogLevel.SILLY, message);
   }
 }
