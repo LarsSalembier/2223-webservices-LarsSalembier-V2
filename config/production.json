@@ -4,5 +4,9 @@
     "enabled": true,
     "to_file": true,
     "to_console": true
+  },
+
+  "database": {
+    "seed": false
   }
 }

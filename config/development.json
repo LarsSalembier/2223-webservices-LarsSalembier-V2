@@ -9,5 +9,9 @@
   "cors": {
     "origins": ["http://localhost:3000"],
     "maxAge": 3600
+  },
+
+  "database": {
+    "seed": true
   }
 }

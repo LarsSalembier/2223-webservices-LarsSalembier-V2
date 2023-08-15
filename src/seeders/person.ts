@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 import { Person } from '@prisma/client';
 import PersonRepository from 'repository/person.js';
 
-class PersonSeed {
+class PersonSeeder {
   private readonly personRepository: PersonRepository;
 
   constructor(personRepository: PersonRepository) {
@@ -21,7 +21,7 @@ class PersonSeed {
   }
 
   private addPerson(): Promise<Person> {
-    return this.personRepository.create(PersonSeed.generatePerson());
+    return this.personRepository.create(PersonSeeder.generatePerson());
   }
 
   async run(): Promise<void> {
@@ -31,4 +31,4 @@ class PersonSeed {
   }
 }
 
-export default PersonSeed;
+export default PersonSeeder;
