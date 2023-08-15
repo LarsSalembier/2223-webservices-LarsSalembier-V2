@@ -1,0 +1,11 @@
+{
+  "log": {
+    "level": "silly",
+    "enabled": true,
+    "toFile": false,
+    "toConsole": true
+  },
+  "database": {
+    "seed": false
+  }
+}

@@ -129,4 +129,4 @@ build
 .pnp.*
 
 # Prisma
-dev.db*
+*.db*
