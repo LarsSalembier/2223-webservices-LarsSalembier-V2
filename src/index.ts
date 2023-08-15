@@ -1,193 +1,57 @@
-import Koa, { Context } from 'koa';
-import Router from '@koa/router';
-import bodyParser from 'koa-bodyparser';
-import koaCors from '@koa/cors';
-import config from 'config';
+import Koa from 'koa';
+import KoaRouter from '@koa/router';
 
-import { Person, PrismaClient } from '@prisma/client';
-import Seed from './seeds/seed.js';
+import { PrismaClient } from '@prisma/client';
+import Router from './router/router.js';
+import CorsManager from './core/CorsManager.js';
 import Repository from './repository/repository.js';
-import { StringifiedPersonData } from './typings/Person.js';
 import CustomPrismaClient from './core/CustomPrismaClient.js';
 import Service from './service/service.js';
 import CustomLogger from './core/CustomLogger.js';
 
 const PORT = 9000;
-const CORS_ORIGINS: string = config.get('cors.origins');
-const CORS_MAX_AGE: number = config.get('cors.maxAge');
 
+// setup loggers
 const serverLogger: CustomLogger = new CustomLogger('Server');
 const prismaLogger: CustomLogger = new CustomLogger('Prisma');
 
+// setup prisma client
 const prisma: PrismaClient = new CustomPrismaClient(prismaLogger);
+
+// setup repository
 const repository: Repository = new Repository(prisma);
+
+// setup service
 const service: Service = new Service(repository);
-const seed: Seed = new Seed(repository);
 
-const { personService } = service;
+// setup seed
+// const seed: Seed = new Seed(repository);
 
+// setup router
+const koaRouter = new KoaRouter();
+const router = new Router(koaRouter, service);
+
+// setup koa app
 const app = new Koa();
 
-app.use(
-  koaCors({
-    origin: (ctx: Context) => {
-      if (
-        ctx.request.header.origin &&
-        CORS_ORIGINS.indexOf(ctx.request.header.origin) !== -1
-      ) {
-        return ctx.request.header.origin;
-      }
-      // Not a valid domain at this point, let's return the first valid as we should return a string
-      if (CORS_ORIGINS.length > 0) {
-        return CORS_ORIGINS[0] as string;
-      }
-      throw new Error('No CORS origins defined');
-    },
-    allowHeaders: ['Accept', 'Content-Type', 'Authorization'],
-    maxAge: CORS_MAX_AGE,
-  })
-);
-
-app.use(bodyParser());
-
-const router = new Router();
-
-function getValidatedId(ctx: Context): number | null {
-  if (!ctx.params.id) {
-    ctx.status = 400;
-    ctx.body = 'ID is required.';
-    return null;
-  }
-  return parseInt(ctx.params.id, 10);
-}
-
-function getValidatedBirthDate(
-  dateString: string | undefined
-): Date | undefined | null {
-  if (!dateString) return undefined;
-
-  const birthDate = new Date(dateString);
-  if (Number.isNaN(birthDate.getTime())) {
-    return null;
-  }
-  return birthDate;
-}
-
-function fromStringifiedToPerson(
-  stringified: StringifiedPersonData
-): Omit<Person, 'id'> {
-  // validate birthdate
-
-  const birthdate = getValidatedBirthDate(stringified.birthdate);
-
-  // now we have to check for undefined values and convert them to null
-  const personData: Omit<Person, 'id'> = {
-    name: stringified.name,
-    email: stringified.email ?? null,
-    phoneNumber: stringified.phoneNumber ?? null,
-    bio: stringified.bio ?? null,
-    studiesOrJob: stringified.studiesOrJob ?? null,
-    birthdate: birthdate ?? null,
-  };
-
-  return personData;
-}
-
-router.get('/api/people', async (ctx) => {
-  const people = await personService.getAll();
-  ctx.body = people;
-});
-
-router.get('/api/people/:id', async (ctx) => {
-  const id = getValidatedId(ctx);
-  if (!id) return;
-
-  const person = await personService.getById(id);
-
-  if (!person) {
-    ctx.status = 404;
-    return;
-  }
-
-  ctx.body = person;
-});
-
-router.post('/api/people', async (ctx) => {
-  const personData = ctx.request.body as StringifiedPersonData;
-
-  if (!personData.name) {
-    ctx.status = 400;
-    ctx.body = 'Name is required.';
-    return;
-  }
-
-  const birthdate = getValidatedBirthDate(personData.birthdate);
-  if (birthdate === null) {
-    ctx.status = 400;
-    ctx.body = 'Invalid birth date.';
-    return;
-  }
-
-  const validatedData = fromStringifiedToPerson(personData);
-
-  const newPerson = await personService.create(validatedData);
-
-  ctx.status = 201;
-  ctx.set('Location', `/api/people/${newPerson.id}`);
-});
-
-router.put('/api/people/:id', async (ctx) => {
-  const id = getValidatedId(ctx);
-  if (!id) return;
-
-  const personData = ctx.request.body as Partial<StringifiedPersonData>;
-
-  const birthdate = getValidatedBirthDate(personData.birthdate);
-  if (birthdate === null) {
-    ctx.status = 400;
-    ctx.body = 'Invalid birth date.';
-    return;
-  }
-
-  const validatedData: Partial<Omit<Person, 'id'>> = {
-    ...personData,
-    birthdate,
-  };
-
-  const updatedPerson = await personService.update(id, validatedData);
-
-  if (!updatedPerson) {
-    ctx.status = 404;
-    return;
-  }
-
-  ctx.status = 204;
-});
-
-router.delete('/api/people/:id', async (ctx) => {
-  const id = getValidatedId(ctx);
-  if (!id) return;
-
-  const idExists = await personService.delete(id);
-
-  if (!idExists) {
-    ctx.status = 404;
-    return;
-  }
-
-  ctx.status = 204;
-});
-
 async function main() {
+  // setup CORS
+  app.use(CorsManager.getCors());
+
+  // setup routes
   app.use(router.routes()).use(router.allowedMethods());
 
-  serverLogger.info(`🚀 Server listening on http://localhost:9000`);
+  // run seeds
+  // await seed.personSeed.run();
 
-  await seed.personSeed.run();
-
+  // start server
   app.listen(PORT);
+
+  // log server startup
+  serverLogger.info(`🚀 Server listening on http://localhost:9000`);
 }
 
+// prisma error management
 main()
   .then(async () => {
     await prisma.$disconnect();
