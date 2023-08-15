@@ -1,8 +1,24 @@
+/* eslint-disable no-console */
 import config from 'config';
 import Server from './core/Server.js';
 
-const shouldSeed: boolean = config.get('database.seed');
+async function main() {
+  try {
+    const shouldSeed: boolean = config.get('database.seed');
+    const server = new Server(shouldSeed);
+    await server.start();
 
-const server = new Server(shouldSeed);
+    const onClose = async () => {
+      await server.stop();
+      process.exit(0);
+    };
 
-server.start();
+    process.on('SIGTERM', onClose);
+    process.on('SIGQUIT', onClose);
+  } catch (error) {
+    console.error(error);
+    process.exit(1);
+  }
+}
+
+main();

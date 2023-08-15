@@ -74,13 +74,19 @@ class Server {
   public async start() {
     await this.runServer()
       .then(async () => {
-        await this.prisma.$disconnect();
+        await this.stop();
       })
       .catch(async (e) => {
         this.prismaLogger.error(e);
-        await this.prisma.$disconnect();
+        await this.stop();
         process.exit(1);
       });
+  }
+
+  public async stop() {
+    this.app.removeAllListeners();
+    await this.prisma.$disconnect();
+    this.serverLogger.info('Server stopped');
   }
 }
 
