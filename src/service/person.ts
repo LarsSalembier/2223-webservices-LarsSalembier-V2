@@ -1,34 +1,104 @@
-import { Person } from '@prisma/client';
-import PersonRepository from '../repository/person.js';
+import { Person, PrismaClient } from '@prisma/client';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library.js';
 
 class PersonService {
-  private readonly repository: PersonRepository;
+  private readonly prisma;
 
-  constructor(repository: PersonRepository) {
-    this.repository = repository;
+  constructor(prismaClient: PrismaClient) {
+    this.prisma = prismaClient;
   }
 
-  public async getAll(): Promise<Person[]> {
-    return this.repository.getAll();
+  async getAll(): Promise<Person[]> {
+    const people = this.prisma.person.findMany();
+
+    return people;
   }
 
-  public async getById(id: number): Promise<Person | null> {
-    return this.repository.getById(id);
+  async getById(id: number): Promise<Person | null> {
+    const person = this.prisma.person.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    return person;
   }
 
-  public async create(personData: Omit<Person, 'id'>): Promise<Person> {
-    return this.repository.create(personData);
+  async create(person: Omit<Person, 'id'>): Promise<Person> {
+    const createdPerson = this.prisma.person.create({
+      data: person,
+    });
+
+    return createdPerson;
   }
 
-  public async update(
+  async createMany(people: Omit<Person, 'id'>[]): Promise<Person[]> {
+    const creationPromises = people.map(async (person) => {
+      return this.prisma.person.create({
+        data: person,
+      });
+    });
+
+    const createdPeople = await Promise.all(creationPromises);
+
+    return createdPeople;
+  }
+
+  async update(
     id: number,
-    newData: Partial<Omit<Person, 'id'>>
+    person: Partial<Omit<Person, 'id'>>
   ): Promise<Person | null> {
-    return this.repository.update(id, newData);
+    try {
+      return await this.prisma.person.update({
+        where: {
+          id,
+        },
+        data: person,
+      });
+    } catch (e) {
+      if (e instanceof PrismaClientKnownRequestError) {
+        if (e.code === 'P2025') {
+          return null;
+        }
+      }
+      throw e;
+    }
   }
 
-  public async delete(id: number): Promise<boolean> {
-    return this.repository.delete(id);
+  async delete(id: number): Promise<boolean> {
+    try {
+      return !!(await this.prisma.person.delete({
+        where: {
+          id,
+        },
+      }));
+    } catch (e) {
+      if (e instanceof PrismaClientKnownRequestError)
+        if (e.code === 'P2025') {
+          return false;
+        }
+      throw e;
+    }
+  }
+
+  async deleteMany(ids: number[]): Promise<number> {
+    const batchPayload = await this.prisma.person.deleteMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
+    return batchPayload.count;
+  }
+
+  async deleteAll(): Promise<number> {
+    const batchPayload = await this.prisma.person.deleteMany({});
+    return batchPayload.count;
+  }
+
+  async count(): Promise<number> {
+    return this.prisma.person.count();
   }
 }
 

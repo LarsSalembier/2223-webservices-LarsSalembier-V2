@@ -1,15 +1,11 @@
-import Repository from '../repository/repository.js';
+import { PrismaClient } from '@prisma/client';
 import PersonService from './person.js';
 
 class Service {
-  private readonly repository: Repository;
-
   public readonly personService: PersonService;
 
-  constructor(repository: Repository) {
-    this.repository = repository;
-
-    this.personService = new PersonService(this.repository.personRepository);
+  constructor(prismaClient: PrismaClient) {
+    this.personService = new PersonService(prismaClient);
   }
 }
 

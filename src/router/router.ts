@@ -1,5 +1,5 @@
 import KoaRouter from '@koa/router';
-import Service from 'service/service.js';
+import Service from '../service/service.js';
 import PersonRouter from './person.js';
 
 class Router {

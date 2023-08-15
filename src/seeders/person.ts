@@ -1,15 +1,15 @@
 import { faker } from '@faker-js/faker';
 import { Person } from '@prisma/client';
-import PersonRepository from 'repository/person.js';
+import PersonService from '../service/person.js';
 
 class PersonSeeder {
-  private readonly personRepository: PersonRepository;
+  private readonly personService: PersonService;
 
-  constructor(personRepository: PersonRepository) {
-    this.personRepository = personRepository;
+  constructor(personService: PersonService) {
+    this.personService = personService;
   }
 
-  private static generatePerson(): Omit<Person, 'id'> {
+  public static generatePerson(): Omit<Person, 'id'> {
     return {
       name: faker.person.fullName(),
       email: faker.internet.email(),
@@ -21,11 +21,11 @@ class PersonSeeder {
   }
 
   private addPerson(): Promise<Person> {
-    return this.personRepository.create(PersonSeeder.generatePerson());
+    return this.personService.create(PersonSeeder.generatePerson());
   }
 
   async run(): Promise<void> {
-    await this.personRepository.deleteAll();
+    await this.personService.deleteAll();
     const promises = Array.from({ length: 10 }).map(() => this.addPerson());
     await Promise.all(promises);
   }

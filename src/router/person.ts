@@ -1,7 +1,7 @@
 import Router from '@koa/router';
 import { Person } from '@prisma/client';
 import { Context } from 'koa';
-import { StringifiedPersonData } from 'typings/Person.js';
+import { StringifiedPersonData } from '../typings/Person.js';
 import PersonService from '../service/person.js';
 
 function getValidatedId(ctx: Context): number | null {
@@ -46,7 +46,7 @@ function fromStringifiedToPerson(
 }
 
 class PersonRouter {
-  private readonly router: Router;
+  public readonly router: Router;
 
   private readonly personService: PersonService;
 

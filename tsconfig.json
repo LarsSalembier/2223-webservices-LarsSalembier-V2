@@ -7,8 +7,8 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "importHelpers": true,
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "newLine": "LF",
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
@@ -19,11 +19,10 @@
     "removeComments": true,
     "resolveJsonModule": true,
     "strict": true,
-    "target": "ES2018",
+    "target": "esnext",
 
     "rootDir": "./src",
-    "outDir": "./dist",
-    "baseUrl": "./src"
+    "outDir": "./dist"
   },
   "include": ["src/**/*.ts"],
   "ts-node": {

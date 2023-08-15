@@ -1,7 +1,0 @@
-{
-  "setupFiles": ["dotenv/config"],
-  "testEnvironment": "node",
-  "testEnvironmentOptions": {
-    "NODE_ENV": "test"
-  }
-}

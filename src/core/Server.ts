@@ -3,7 +3,6 @@ import KoaRouter from '@koa/router';
 
 import { PrismaClient } from '@prisma/client';
 import Seeder from '../seeders/seeder.js';
-import Repository from '../repository/repository.js';
 import Service from '../service/service.js';
 import Router from '../router/router.js';
 import CorsManager from './CorsManager.js';
@@ -18,8 +17,6 @@ class Server {
   private readonly prismaLogger: CustomLogger;
 
   private readonly prisma: PrismaClient;
-
-  private readonly repository: Repository;
 
   private readonly service: Service;
 
@@ -39,15 +36,12 @@ class Server {
     // setup prisma client
     this.prisma = new CustomPrismaClient(this.prismaLogger);
 
-    // setup repository
-    this.repository = new Repository(this.prisma);
-
     // setup service
-    this.service = new Service(this.repository);
+    this.service = new Service(this.prisma);
 
     if (seedDatabase) {
       // setup seeds
-      this.seed = new Seeder(this.repository);
+      this.seed = new Seeder(this.service);
     }
 
     // setup router

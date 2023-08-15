@@ -1,7 +1,7 @@
 import winston from 'winston';
 import config from 'config';
 
-enum LogLevel {
+export enum LogLevel {
   ERROR = 'error',
   WARN = 'warn',
   INFO = 'info',
