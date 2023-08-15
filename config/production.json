@@ -3,6 +3,6 @@
     "level": "info",
     "enabled": true,
     "to_file": true,
-    "to_console": false
+    "to_console": true
   }
 }

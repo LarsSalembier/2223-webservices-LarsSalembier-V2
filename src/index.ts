@@ -4,13 +4,27 @@ import bodyParser from 'koa-bodyparser';
 import koaCors from '@koa/cors';
 import config from 'config';
 
-import { PersonData, StringifiedPersonData } from 'typings/Person.js';
-import Logger from './core/Logger.js';
-import PersonService from './service/person.js';
+import { Person, PrismaClient } from '@prisma/client';
+import Seed from './seeds/seed.js';
+import Repository from './repository/repository.js';
+import { StringifiedPersonData } from './typings/Person.js';
+import CustomPrismaClient from './core/CustomPrismaClient.js';
+import Service from './service/service.js';
+import CustomLogger from './core/CustomLogger.js';
 
 const PORT = 9000;
 const CORS_ORIGINS: string = config.get('cors.origins');
 const CORS_MAX_AGE: number = config.get('cors.maxAge');
+
+const serverLogger: CustomLogger = new CustomLogger('Server');
+const prismaLogger: CustomLogger = new CustomLogger('Prisma');
+
+const prisma: PrismaClient = new CustomPrismaClient(prismaLogger);
+const repository: Repository = new Repository(prisma);
+const service: Service = new Service(repository);
+const seed: Seed = new Seed(repository);
+
+const { personService } = service;
 
 const app = new Koa();
 
@@ -38,18 +52,18 @@ app.use(bodyParser());
 
 const router = new Router();
 
-const getValidatedId = (ctx: Context): number | null => {
+function getValidatedId(ctx: Context): number | null {
   if (!ctx.params.id) {
     ctx.status = 400;
     ctx.body = 'ID is required.';
     return null;
   }
   return parseInt(ctx.params.id, 10);
-};
+}
 
-const getValidatedBirthDate = (
+function getValidatedBirthDate(
   dateString: string | undefined
-): Date | undefined | null => {
+): Date | undefined | null {
   if (!dateString) return undefined;
 
   const birthDate = new Date(dateString);
@@ -57,10 +71,30 @@ const getValidatedBirthDate = (
     return null;
   }
   return birthDate;
-};
+}
+
+function fromStringifiedToPerson(
+  stringified: StringifiedPersonData
+): Omit<Person, 'id'> {
+  // validate birthdate
+
+  const birthdate = getValidatedBirthDate(stringified.birthdate);
+
+  // now we have to check for undefined values and convert them to null
+  const personData: Omit<Person, 'id'> = {
+    name: stringified.name,
+    email: stringified.email ?? null,
+    phoneNumber: stringified.phoneNumber ?? null,
+    bio: stringified.bio ?? null,
+    studiesOrJob: stringified.studiesOrJob ?? null,
+    birthdate: birthdate ?? null,
+  };
+
+  return personData;
+}
 
 router.get('/api/people', async (ctx) => {
-  const people = await PersonService.getAll();
+  const people = await personService.getAll();
   ctx.body = people;
 });
 
@@ -68,7 +102,7 @@ router.get('/api/people/:id', async (ctx) => {
   const id = getValidatedId(ctx);
   if (!id) return;
 
-  const person = await PersonService.getById(id);
+  const person = await personService.getById(id);
 
   if (!person) {
     ctx.status = 404;
@@ -87,19 +121,16 @@ router.post('/api/people', async (ctx) => {
     return;
   }
 
-  const birthDate = getValidatedBirthDate(personData.birthDate);
-  if (birthDate === null) {
+  const birthdate = getValidatedBirthDate(personData.birthdate);
+  if (birthdate === null) {
     ctx.status = 400;
     ctx.body = 'Invalid birth date.';
     return;
   }
 
-  const validatedData: PersonData = {
-    ...personData,
-    birthDate,
-  };
+  const validatedData = fromStringifiedToPerson(personData);
 
-  const newPerson = await PersonService.create(validatedData);
+  const newPerson = await personService.create(validatedData);
 
   ctx.status = 201;
   ctx.set('Location', `/api/people/${newPerson.id}`);
@@ -111,21 +142,21 @@ router.put('/api/people/:id', async (ctx) => {
 
   const personData = ctx.request.body as Partial<StringifiedPersonData>;
 
-  const birthDate = getValidatedBirthDate(personData.birthDate);
-  if (birthDate === null) {
+  const birthdate = getValidatedBirthDate(personData.birthdate);
+  if (birthdate === null) {
     ctx.status = 400;
     ctx.body = 'Invalid birth date.';
     return;
   }
 
-  const validatedData: Partial<PersonData> = {
+  const validatedData: Partial<Omit<Person, 'id'>> = {
     ...personData,
-    birthDate,
+    birthdate,
   };
 
-  const idExists = await PersonService.update(id, validatedData);
+  const updatedPerson = await personService.update(id, validatedData);
 
-  if (!idExists) {
+  if (!updatedPerson) {
     ctx.status = 404;
     return;
   }
@@ -137,7 +168,7 @@ router.delete('/api/people/:id', async (ctx) => {
   const id = getValidatedId(ctx);
   if (!id) return;
 
-  const idExists = await PersonService.remove(id);
+  const idExists = await personService.delete(id);
 
   if (!idExists) {
     ctx.status = 404;
@@ -147,9 +178,22 @@ router.delete('/api/people/:id', async (ctx) => {
   ctx.status = 204;
 });
 
-app.use(router.routes()).use(router.allowedMethods());
+async function main() {
+  app.use(router.routes()).use(router.allowedMethods());
 
-const logger = Logger.getLogger();
-logger.info(`🚀 Server listening on http://localhost:9000`);
+  serverLogger.info(`🚀 Server listening on http://localhost:9000`);
 
-app.listen(PORT);
+  await seed.personSeed.run();
+
+  app.listen(PORT);
+}
+
+main()
+  .then(async () => {
+    await prisma.$disconnect();
+  })
+  .catch(async (e) => {
+    prismaLogger.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  });

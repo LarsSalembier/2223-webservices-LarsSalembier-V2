@@ -23,10 +23,10 @@ const customFormat = winston.format.printf(
   }
 );
 
-class Logger {
-  private static logger: winston.Logger = Logger.setupLogger();
+class CustomLogger {
+  private logger: winston.Logger;
 
-  private static setupLogger(): winston.Logger {
+  constructor(name: string) {
     const transports: winston.transport[] = [];
 
     // Add file transports if logging to file is enabled
@@ -47,10 +47,10 @@ class Logger {
       transports.push(new winston.transports.Console());
     }
 
-    return winston.createLogger({
+    this.logger = winston.createLogger({
       level: LOG_LEVEL,
       format: winston.format.combine(
-        winston.format.label({ label: 'MAIN' }),
+        winston.format.label({ label: name }),
         winston.format.timestamp(),
         customFormat
       ),
@@ -59,39 +59,39 @@ class Logger {
     });
   }
 
-  public static log(level: LogLevel, message: string): void {
+  public log(level: LogLevel, message: string): void {
     if (LOG_ENABLED) {
-      Logger.logger.log(level, message);
+      this.logger.log(level, message);
     }
   }
 
-  public static error(message: string): void {
+  public error(message: string): void {
     this.log(LogLevel.ERROR, message);
   }
 
-  public static warn(message: string): void {
+  public warn(message: string): void {
     this.log(LogLevel.WARN, message);
   }
 
-  public static info(message: string): void {
+  public info(message: string): void {
     this.log(LogLevel.INFO, message);
   }
 
-  public static http(message: string): void {
+  public http(message: string): void {
     this.log(LogLevel.HTTP, message);
   }
 
-  public static verbose(message: string): void {
+  public verbose(message: string): void {
     this.log(LogLevel.VERBOSE, message);
   }
 
-  public static debug(message: string): void {
+  public debug(message: string): void {
     this.log(LogLevel.DEBUG, message);
   }
 
-  public static silly(message: string): void {
+  public silly(message: string): void {
     this.log(LogLevel.SILLY, message);
   }
 }
 
-export default Logger;
+export default CustomLogger;
