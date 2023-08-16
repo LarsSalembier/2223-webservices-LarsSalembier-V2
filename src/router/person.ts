@@ -59,6 +59,11 @@ class PersonRouter {
       ctx.body = people;
     });
 
+    router.get('/api/people/count', async (ctx) => {
+      const count = await personService.count();
+      ctx.body = count;
+    });
+
     router.get('/api/people/:id', async (ctx) => {
       const id = getValidatedId(ctx);
       if (!id) return;
@@ -78,7 +83,17 @@ class PersonRouter {
 
       if (!personData.name) {
         ctx.status = 400;
-        ctx.body = 'Name is required.';
+        ctx.body = {
+          error: 'Missing name',
+        };
+        return;
+      }
+
+      if (personData.name.length > 100) {
+        ctx.status = 400;
+        ctx.body = {
+          error: 'Name too long',
+        };
         return;
       }
 
@@ -133,6 +148,19 @@ class PersonRouter {
 
       if (!idExists) {
         ctx.status = 404;
+        return;
+      }
+
+      ctx.status = 204;
+    });
+
+    router.delete('/api/people', async (ctx) => {
+      const count = await personService.count();
+      const amountDeleted = await personService.deleteAll();
+
+      if (amountDeleted !== count) {
+        ctx.status = 500;
+        ctx.body = 'Some people in the request did not exist.';
         return;
       }
 

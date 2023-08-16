@@ -2,6 +2,7 @@ import Koa from 'koa';
 import KoaRouter from '@koa/router';
 
 import { PrismaClient } from '@prisma/client';
+import bodyParser from 'koa-bodyparser';
 import Seeder from '../seeders/seeder.js';
 import Service from '../service/service.js';
 import Router from '../router/router.js';
@@ -26,7 +27,7 @@ class Server {
 
   private readonly router: Router;
 
-  private readonly app: Koa;
+  public readonly app: Koa;
 
   constructor(seedDatabase: boolean = false) {
     // setup loggers
@@ -55,6 +56,9 @@ class Server {
   private async runServer() {
     // setup CORS
     this.app.use(CorsManager.getCors());
+
+    // setup body parser
+    this.app.use(bodyParser());
 
     // setup routes
     this.app.use(this.router.routes()).use(this.router.allowedMethods());
