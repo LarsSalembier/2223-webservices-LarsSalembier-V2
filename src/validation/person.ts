@@ -20,7 +20,7 @@ const schemas: ValidationSchemas = {
       phoneNumber: Joi.string().max(20).trim(),
       bio: Joi.string().max(500).trim(),
       studiesOrJob: Joi.string().max(100).trim(),
-      birthdate: Joi.date().iso(),
+      birthdate: Joi.date().iso().greater('1900-01-01').less('now'),
     }),
   },
   updatePerson: {
@@ -33,7 +33,7 @@ const schemas: ValidationSchemas = {
       phoneNumber: Joi.string().max(20).trim(),
       bio: Joi.string().max(500).trim(),
       studiesOrJob: Joi.string().max(100).trim(),
-      birthdate: Joi.date().iso(),
+      birthdate: Joi.date().iso().greater('1900-01-01').less('now'),
     }),
   },
   deletePerson: {
