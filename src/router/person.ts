@@ -1,49 +1,9 @@
 import Router from '@koa/router';
 import { Person } from '@prisma/client';
 import { Context } from 'koa';
-import { StringifiedPersonData } from '../typings/Person.js';
 import PersonService from '../service/person.js';
-
-function getValidatedId(ctx: Context): number | null {
-  if (!ctx.params.id) {
-    ctx.status = 400;
-    ctx.body = 'ID is required.';
-    return null;
-  }
-  return parseInt(ctx.params.id, 10);
-}
-
-function getValidatedBirthDate(
-  dateString: string | undefined
-): Date | undefined | null {
-  if (!dateString) return undefined;
-
-  const birthDate = new Date(dateString);
-  if (Number.isNaN(birthDate.getTime())) {
-    return null;
-  }
-  return birthDate;
-}
-
-function fromStringifiedToPerson(
-  stringified: StringifiedPersonData
-): Omit<Person, 'id'> {
-  // validate birthdate
-
-  const birthdate = getValidatedBirthDate(stringified.birthdate);
-
-  // now we have to check for undefined values and convert them to null
-  const personData: Omit<Person, 'id'> = {
-    name: stringified.name,
-    email: stringified.email ?? null,
-    phoneNumber: stringified.phoneNumber ?? null,
-    bio: stringified.bio ?? null,
-    studiesOrJob: stringified.studiesOrJob ?? null,
-    birthdate: birthdate ?? null,
-  };
-
-  return personData;
-}
+import Validator from '../validation/validation.js';
+import schemas from '../validation/person.js';
 
 class PersonRouter {
   public readonly router: Router;
@@ -54,118 +14,117 @@ class PersonRouter {
     this.router = router;
     this.personService = personService;
 
-    router.get('/api/people', async (ctx) => {
-      const people = await personService.getAll();
-      ctx.body = people;
-    });
+    router.get(
+      '/api/people',
+      Validator.validate(schemas.getAllPeople),
+      this.getAllPeople
+    );
 
-    router.get('/api/people/count', async (ctx) => {
-      const count = await personService.count();
-      ctx.body = count;
-    });
+    router.get(
+      '/api/people/count',
+      Validator.validate(schemas.getPeopleCount),
+      this.getPeopleCount
+    );
 
-    router.get('/api/people/:id', async (ctx) => {
-      const id = getValidatedId(ctx);
-      if (!id) return;
+    router.get(
+      '/api/people/:id',
+      Validator.validate(schemas.getPersonById),
+      this.getPersonById
+    );
 
-      const person = await personService.getById(id);
+    router.post(
+      '/api/people',
+      Validator.validate(schemas.createPerson),
+      this.createPerson
+    );
 
-      if (!person) {
-        ctx.status = 404;
-        return;
-      }
+    router.put(
+      '/api/people/:id',
+      Validator.validate(schemas.updatePerson),
+      this.updatePerson
+    );
 
-      ctx.body = person;
-    });
+    router.delete(
+      '/api/people/:id',
+      Validator.validate(schemas.deletePerson),
+      this.deletePerson
+    );
 
-    router.post('/api/people', async (ctx) => {
-      const personData = ctx.request.body as StringifiedPersonData;
+    router.delete(
+      '/api/people',
+      Validator.validate(schemas.deleteAllPeople),
+      this.deleteAllPeople
+    );
+  }
 
-      if (!personData.name) {
-        ctx.status = 400;
-        ctx.body = {
-          error: 'Missing name',
-        };
-        return;
-      }
+  async getAllPeople(ctx: Context) {
+    const people = await this.personService.getAll();
+    ctx.body = people;
+  }
 
-      if (personData.name.length > 100) {
-        ctx.status = 400;
-        ctx.body = {
-          error: 'Name too long',
-        };
-        return;
-      }
+  async getPeopleCount(ctx: Context) {
+    const count = await this.personService.count();
+    ctx.body = count;
+  }
 
-      const birthdate = getValidatedBirthDate(personData.birthdate);
-      if (birthdate === null) {
-        ctx.status = 400;
-        ctx.body = 'Invalid birth date.';
-        return;
-      }
+  async getPersonById(ctx: Context) {
+    const person = await this.personService.getById(ctx.context.id);
 
-      const validatedData = fromStringifiedToPerson(personData);
+    if (!person) {
+      ctx.status = 404;
+      return;
+    }
 
-      const newPerson = await personService.create(validatedData);
+    ctx.body = person;
+  }
 
-      ctx.status = 201;
-      ctx.set('Location', `/api/people/${newPerson.id}`);
-    });
+  async createPerson(ctx: Context) {
+    const inputData = ctx.request.body as Omit<Person, 'id'>;
 
-    router.put('/api/people/:id', async (ctx) => {
-      const id = getValidatedId(ctx);
-      if (!id) return;
+    const createdPerson = await this.personService.create(inputData);
 
-      const personData = ctx.request.body as Partial<StringifiedPersonData>;
+    ctx.status = 201;
+    ctx.set('Location', `/api/people/${createdPerson.id}`);
+  }
 
-      const birthdate = getValidatedBirthDate(personData.birthdate);
-      if (birthdate === null) {
-        ctx.status = 400;
-        ctx.body = 'Invalid birth date.';
-        return;
-      }
+  async updatePerson(ctx: Context) {
+    const inputData = ctx.request.body as Partial<Omit<Person, 'id'>>;
 
-      const validatedData: Partial<Omit<Person, 'id'>> = {
-        ...personData,
-        birthdate,
-      };
+    const updatedPerson = await this.personService.update(
+      ctx.params.id,
+      inputData
+    );
 
-      const updatedPerson = await personService.update(id, validatedData);
+    if (!updatedPerson) {
+      ctx.status = 404;
+      return;
+    }
 
-      if (!updatedPerson) {
-        ctx.status = 404;
-        return;
-      }
+    ctx.status = 204;
+  }
 
-      ctx.status = 204;
-    });
+  async deletePerson(ctx: Context) {
+    const deletedPerson = await this.personService.delete(ctx.params.id);
 
-    router.delete('/api/people/:id', async (ctx) => {
-      const id = getValidatedId(ctx);
-      if (!id) return;
+    if (!deletedPerson) {
+      ctx.status = 404;
+      return;
+    }
 
-      const idExists = await personService.delete(id);
+    ctx.status = 204;
+  }
 
-      if (!idExists) {
-        ctx.status = 404;
-        return;
-      }
+  async deleteAllPeople(ctx: Context) {
+    const count = await this.personService.count();
+    const amountDeleted = await this.personService.deleteAll();
 
-      ctx.status = 204;
-    });
+    if (amountDeleted !== count) {
+      ctx.status = 500;
+      ctx.body = 'Some people in the request did not exist.';
+      return;
+    }
 
-    router.delete('/api/people', async (ctx) => {
-      const count = await personService.count();
-      const amountDeleted = await personService.deleteAll();
-
-      if (amountDeleted !== count) {
-        ctx.status = 500;
-        ctx.body = 'Some people in the request did not exist.';
-        return;
-      }
-
-      ctx.status = 204;
-    });
+    ctx.status = 204;
   }
 }
 
