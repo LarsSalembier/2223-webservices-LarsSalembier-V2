@@ -22,10 +22,7 @@ afterAll(async () => {
 describe('personService', () => {
   describe('getAll', () => {
     it('should return all persons', async () => {
-      const persons = [
-        PersonSeeder.generatePerson(),
-        PersonSeeder.generatePerson(),
-      ];
+      const persons = [PersonSeeder.generate(), PersonSeeder.generate()];
 
       await personService.createMany(persons);
 
@@ -43,7 +40,7 @@ describe('personService', () => {
 
   describe('getById', () => {
     it('should return a person', async () => {
-      const person = PersonSeeder.generatePerson();
+      const person = PersonSeeder.generate();
 
       const generatedPerson = await personService.create(person);
 
@@ -59,7 +56,7 @@ describe('personService', () => {
 
   describe('create', () => {
     it('should return the created person with id', async () => {
-      const person = PersonSeeder.generatePerson();
+      const person = PersonSeeder.generate();
 
       const result = await personService.create(person);
 
@@ -75,10 +72,7 @@ describe('personService', () => {
 
   describe('createMany', () => {
     it('should return the created persons with id', async () => {
-      const persons = [
-        PersonSeeder.generatePerson(),
-        PersonSeeder.generatePerson(),
-      ];
+      const persons = [PersonSeeder.generate(), PersonSeeder.generate()];
 
       const result = await personService.createMany(persons);
 
@@ -111,7 +105,7 @@ describe('personService', () => {
 
   describe('update', () => {
     it('should return the updated person', async () => {
-      const person = PersonSeeder.generatePerson();
+      const person = PersonSeeder.generate();
 
       const generatedPerson = await personService.create(person);
 
@@ -140,13 +134,13 @@ describe('personService', () => {
     });
 
     it('should throw ServiceError when given wrong id', async () => {
-      const person = PersonSeeder.generatePerson();
+      const person = PersonSeeder.generate();
 
       await expect(personService.update(1, person)).rejects.toThrow();
     });
 
     it('can also just update one field', async () => {
-      const person = PersonSeeder.generatePerson();
+      const person = PersonSeeder.generate();
 
       const generatedPerson = await personService.create(person);
 
@@ -172,7 +166,7 @@ describe('personService', () => {
 
   describe('delete', () => {
     it('returns the deleted object', async () => {
-      const person = PersonSeeder.generatePerson();
+      const person = PersonSeeder.generate();
 
       const generatedPerson = await personService.create(person);
 
@@ -186,7 +180,7 @@ describe('personService', () => {
     });
 
     it('should actually remove the person from the database', async () => {
-      const person = PersonSeeder.generatePerson();
+      const person = PersonSeeder.generate();
 
       const generatedPerson = await personService.create(person);
 
@@ -198,10 +192,7 @@ describe('personService', () => {
 
   describe('deleteMany', () => {
     it('should return the amount of deleted persons', async () => {
-      const persons = [
-        PersonSeeder.generatePerson(),
-        PersonSeeder.generatePerson(),
-      ];
+      const persons = [PersonSeeder.generate(), PersonSeeder.generate()];
 
       const generatedPersons = await personService.createMany(persons);
       const ids = generatedPersons.map((p) => p.id);
@@ -218,10 +209,7 @@ describe('personService', () => {
     });
 
     it('should actually remove the persons from the database', async () => {
-      const persons = [
-        PersonSeeder.generatePerson(),
-        PersonSeeder.generatePerson(),
-      ];
+      const persons = [PersonSeeder.generate(), PersonSeeder.generate()];
 
       const generatedPersons = await personService.createMany(persons);
       const ids = generatedPersons.map((p) => p.id);
@@ -240,10 +228,7 @@ describe('personService', () => {
     });
 
     it('should return the amount of deleted persons when given some wrong ids', async () => {
-      const persons = [
-        PersonSeeder.generatePerson(),
-        PersonSeeder.generatePerson(),
-      ];
+      const persons = [PersonSeeder.generate(), PersonSeeder.generate()];
 
       const generatedPersons = await personService.createMany(persons);
       const ids = generatedPersons.map((p) => p.id);
@@ -254,10 +239,7 @@ describe('personService', () => {
     });
 
     it('should be able to handle the case where some ids are the same', async () => {
-      const persons = [
-        PersonSeeder.generatePerson(),
-        PersonSeeder.generatePerson(),
-      ];
+      const persons = [PersonSeeder.generate(), PersonSeeder.generate()];
 
       const generatedPersons = await personService.createMany(persons);
       const ids = generatedPersons.map((p) => p.id);
@@ -270,10 +252,7 @@ describe('personService', () => {
 
   describe('deleteAll', () => {
     it('should return the amount of deleted persons', async () => {
-      const persons = [
-        PersonSeeder.generatePerson(),
-        PersonSeeder.generatePerson(),
-      ];
+      const persons = [PersonSeeder.generate(), PersonSeeder.generate()];
 
       await personService.createMany(persons);
 
@@ -289,10 +268,7 @@ describe('personService', () => {
     });
 
     it('should actually remove the persons from the database', async () => {
-      const persons = [
-        PersonSeeder.generatePerson(),
-        PersonSeeder.generatePerson(),
-      ];
+      const persons = [PersonSeeder.generate(), PersonSeeder.generate()];
 
       await personService.createMany(persons);
 

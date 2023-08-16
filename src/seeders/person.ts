@@ -3,13 +3,13 @@ import { Person } from '@prisma/client';
 import PersonService from '../service/person.js';
 
 class PersonSeeder {
-  private readonly personService: PersonService;
+  private readonly service: PersonService;
 
-  constructor(personService: PersonService) {
-    this.personService = personService;
+  constructor(service: PersonService) {
+    this.service = service;
   }
 
-  public static generatePerson(): Omit<Person, 'id'> {
+  public static generate(): Omit<Person, 'id'> {
     return {
       name: faker.person.fullName().trim(),
       email: faker.internet.email().trim(),
@@ -20,13 +20,13 @@ class PersonSeeder {
     };
   }
 
-  private addPerson(): Promise<Person> {
-    return this.personService.create(PersonSeeder.generatePerson());
+  private add(): Promise<Person> {
+    return this.service.create(PersonSeeder.generate());
   }
 
   async run(): Promise<void> {
-    await this.personService.deleteAll();
-    const promises = Array.from({ length: 10 }).map(() => this.addPerson());
+    await this.service.deleteAll();
+    const promises = Array.from({ length: 10 }).map(() => this.add());
     await Promise.all(promises);
   }
 }

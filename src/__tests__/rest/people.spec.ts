@@ -25,7 +25,7 @@ const sortPeopleWithId = (a: Person, b: Person) => {
 const people: Omit<Person, 'id'>[] = Array.from({
   length: AMOUNT_OF_PEOPLE,
 })
-  .map(() => PersonSeeder.generatePerson())
+  .map(() => PersonSeeder.generate())
   .sort(sortPeople);
 
 async function addAllPeople(request: supertest.SuperTest<supertest.Test>) {

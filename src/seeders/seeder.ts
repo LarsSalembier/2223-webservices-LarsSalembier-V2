@@ -1,18 +1,25 @@
 import Service from '../service/service.js';
+import AdministratorSeeder from './administrator.js';
 import PersonSeeder from './person.js';
 
 class Seeder {
   private readonly service: Service;
 
-  public readonly personSeed: PersonSeeder;
+  public readonly personSeeder: PersonSeeder;
+
+  public readonly administratorSeeder: AdministratorSeeder;
 
   constructor(service: Service) {
     this.service = service;
-    this.personSeed = new PersonSeeder(this.service.personService);
+    this.personSeeder = new PersonSeeder(this.service.personService);
+    this.administratorSeeder = new AdministratorSeeder(
+      this.service.administratorService
+    );
   }
 
   public async run(): Promise<void> {
-    await this.personSeed.run();
+    await this.personSeeder.run();
+    await this.administratorSeeder.run();
   }
 }
 
