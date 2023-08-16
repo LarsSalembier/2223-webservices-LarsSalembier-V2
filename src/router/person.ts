@@ -17,7 +17,6 @@ class PersonRouter {
     this.service = service;
 
     this.getAll = this.getAll.bind(this);
-    this.count = this.count.bind(this);
     this.getById = this.getById.bind(this);
     this.create = this.create.bind(this);
     this.update = this.update.bind(this);
@@ -43,12 +42,11 @@ class PersonRouter {
     );
 
     router.delete(PATH, Validator.validate(schemas.deleteAll), this.deleteAll);
-
-    router.get(`${PATH}/count`, Validator.validate(schemas.count), this.count);
   }
 
   async getAll(ctx: Context) {
     const people = await this.service.getAll();
+
     ctx.body = people;
   }
 
@@ -85,11 +83,6 @@ class PersonRouter {
     await this.service.deleteAll();
 
     ctx.status = 204;
-  }
-
-  async count(ctx: Context) {
-    const count = await this.service.count();
-    ctx.body = count;
   }
 }
 

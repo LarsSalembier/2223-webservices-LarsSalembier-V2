@@ -11,12 +11,12 @@ class PersonSeeder {
 
   public static generatePerson(): Omit<Person, 'id'> {
     return {
-      name: faker.person.fullName(),
-      email: faker.internet.email(),
+      name: faker.person.fullName().trim(),
+      email: faker.internet.email().trim(),
       phoneNumber: faker.phone.number(),
-      bio: faker.lorem.paragraph(),
-      studiesOrJob: faker.person.jobTitle(),
-      birthdate: faker.date.past(),
+      bio: faker.person.bio().trim(),
+      studiesOrJob: faker.person.jobTitle().trim(),
+      birthdate: faker.date.between({ from: '1910-01-01', to: '2000-01-01' }),
     };
   }
 

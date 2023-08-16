@@ -2,15 +2,15 @@
   "log": {
     "level": "silly",
     "enabled": true,
-    "toFile": false,
+    "toFile": true,
     "toConsole": true
   },
-  
+
   "cors": {
     "origins": ["http://localhost:3000"],
     "maxAge": 3600
   },
-  
+
   "database": {
     "seed": false
   }

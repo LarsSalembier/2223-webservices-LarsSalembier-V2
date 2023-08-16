@@ -52,10 +52,8 @@ describe('personService', () => {
       expect(result).toEqual(generatedPerson);
     });
 
-    it('should return null', async () => {
-      const result = await personService.getById(1);
-
-      expect(result).toBeNull();
+    it('should throw a ServiceError when given wrong id', async () => {
+      await expect(personService.getById(1)).rejects.toThrow();
     });
   });
 
@@ -141,12 +139,10 @@ describe('personService', () => {
       expect(result).toHaveProperty('birthdate', updatedPerson.birthdate);
     });
 
-    it('should return null when given wrong id', async () => {
+    it('should throw ServiceError when given wrong id', async () => {
       const person = PersonSeeder.generatePerson();
 
-      const updatedPerson = await personService.update(1, person);
-
-      expect(updatedPerson).toBeNull();
+      await expect(personService.update(1, person)).rejects.toThrow();
     });
 
     it('can also just update one field', async () => {
@@ -175,19 +171,18 @@ describe('personService', () => {
   });
 
   describe('delete', () => {
-    it('should return true when given correct id', async () => {
+    it('returns the deleted object', async () => {
       const person = PersonSeeder.generatePerson();
 
       const generatedPerson = await personService.create(person);
 
       const result = await personService.delete(generatedPerson.id);
 
-      expect(result).toBe(true);
+      expect(result).toEqual(generatedPerson);
     });
 
-    it('should return false when given wrong id', async () => {
-      const result = await personService.delete(1);
-      expect(result).toBe(false);
+    it('should throw ServiceError when given wrong id', async () => {
+      await expect(personService.delete(1)).rejects.toThrow();
     });
 
     it('should actually remove the person from the database', async () => {
@@ -197,9 +192,7 @@ describe('personService', () => {
 
       await personService.delete(generatedPerson.id);
 
-      const personInDb = await personService.getById(generatedPerson.id);
-
-      expect(personInDb).toBeNull();
+      await expect(personService.getById(generatedPerson.id)).rejects.toThrow();
     });
   });
 
@@ -308,27 +301,6 @@ describe('personService', () => {
       const remainingPeople = await personService.getAll();
 
       expect(remainingPeople).toHaveLength(0);
-    });
-  });
-
-  describe('count', () => {
-    it('should return the amount of persons', async () => {
-      const persons = [
-        PersonSeeder.generatePerson(),
-        PersonSeeder.generatePerson(),
-      ];
-
-      await personService.createMany(persons);
-
-      const result = await personService.count();
-
-      expect(result).toBe(2);
-    });
-
-    it('should return 0 when no persons', async () => {
-      const result = await personService.count();
-
-      expect(result).toBe(0);
     });
   });
 });

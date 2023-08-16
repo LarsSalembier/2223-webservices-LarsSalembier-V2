@@ -102,10 +102,6 @@ class PersonService {
     const batchPayload = await this.prisma.person.deleteMany({});
     return batchPayload.count;
   }
-
-  async count(): Promise<number> {
-    return this.prisma.person.count();
-  }
 }
 
 export default PersonService;

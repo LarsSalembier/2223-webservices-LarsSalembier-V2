@@ -11,8 +11,8 @@ const schemas: ValidationSchemas = {
   create: {
     body: Joi.object({
       name: Joi.string().max(100).min(3).required().trim(),
-      email: Joi.string().email().trim().optional(),
-      phoneNumber: Joi.string().max(20).trim().optional(),
+      email: Joi.string().email().max(100).trim().optional(),
+      phoneNumber: Joi.string().max(30).trim().optional(),
       bio: Joi.string().max(500).trim().optional(),
       studiesOrJob: Joi.string().max(100).trim().optional(),
       birthdate: Joi.date().iso().greater('1900-01-01').less('now').optional(),
@@ -23,12 +23,12 @@ const schemas: ValidationSchemas = {
       id: Joi.number().integer().required().min(1),
     }),
     body: Joi.object({
-      name: Joi.string().max(100).trim(),
-      email: Joi.string().email().trim(),
-      phoneNumber: Joi.string().max(20).trim(),
-      bio: Joi.string().max(500).trim(),
-      studiesOrJob: Joi.string().max(100).trim(),
-      birthdate: Joi.date().iso().greater('1900-01-01').less('now'),
+      name: Joi.string().max(100).min(3).trim().optional(),
+      email: Joi.string().email().max(100).trim().optional(),
+      phoneNumber: Joi.string().max(30).trim().optional(),
+      bio: Joi.string().max(500).trim().optional(),
+      studiesOrJob: Joi.string().max(100).trim().optional(),
+      birthdate: Joi.date().iso().greater('1900-01-01').less('now').optional(),
     }),
   },
   delete: {
@@ -37,7 +37,6 @@ const schemas: ValidationSchemas = {
     }),
   },
   deleteAll: {},
-  count: {},
 };
 
 export default schemas;

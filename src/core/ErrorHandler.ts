@@ -36,6 +36,8 @@ class ErrorHandler {
           details: {},
         };
       }
+
+      ctx.status = 404;
     } catch (err) {
       if (!(err instanceof Error)) {
         throw new TypeError('Caught exception is not an Error instance.');
