@@ -2,7 +2,7 @@
   "log": {
     "level": "silly",
     "enabled": true,
-    "toFile": false,
+    "toFile": true,
     "toConsole": true
   },
 

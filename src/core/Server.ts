@@ -9,6 +9,8 @@ import Router from '../router/router.js';
 import CorsManager from './CorsManager.js';
 import CustomLogger from './CustomLogger.js';
 import CustomPrismaClient from './CustomPrismaClient.js';
+import RequestLogger from './RequestLogger.js';
+import ErrorHandler from './ErrorHandler.js';
 
 const PORT = 9000;
 
@@ -17,22 +19,30 @@ class Server {
 
   private readonly prismaLogger: CustomLogger;
 
+  private readonly requestLogger: RequestLogger;
+
   private readonly prisma: PrismaClient;
 
   private readonly service: Service;
 
-  private readonly seed: Seeder | null = null;
-
   private readonly koaRouter: KoaRouter;
 
+  private readonly errorHandler: ErrorHandler;
+
   private readonly router: Router;
+
+  private readonly seed: Seeder | null = null;
 
   public readonly app: Koa;
 
   constructor(seedDatabase: boolean = false) {
     // setup loggers
     this.serverLogger = new CustomLogger('Server');
-    this.prismaLogger = new CustomLogger('Prisma');
+    this.prismaLogger = new CustomLogger('Prisma', false);
+    this.requestLogger = new RequestLogger(this.serverLogger);
+    this.requestLogger.koaMiddleware = this.requestLogger.koaMiddleware.bind(
+      this.requestLogger
+    );
 
     // setup prisma client
     this.prisma = new CustomPrismaClient(this.prismaLogger);
@@ -40,14 +50,20 @@ class Server {
     // setup service
     this.service = new Service(this.prisma);
 
-    if (seedDatabase) {
-      // setup seeds
-      this.seed = new Seeder(this.service);
-    }
+    // setup error handler
+    this.errorHandler = new ErrorHandler(this.serverLogger);
+    this.errorHandler.koaMiddleware = this.errorHandler.koaMiddleware.bind(
+      this.errorHandler
+    );
 
     // setup router
     this.koaRouter = new KoaRouter();
     this.router = new Router(this.koaRouter, this.service);
+
+    if (seedDatabase) {
+      // setup seeds
+      this.seed = new Seeder(this.service);
+    }
 
     // setup koa app
     this.app = new Koa();
@@ -56,6 +72,12 @@ class Server {
   private async runServer() {
     // setup CORS
     this.app.use(CorsManager.getCors());
+
+    // setup request logger
+    this.app.use(this.requestLogger.koaMiddleware);
+
+    // setup error handler
+    this.app.use(this.errorHandler.koaMiddleware);
 
     // setup body parser
     this.app.use(bodyParser());
@@ -78,7 +100,7 @@ class Server {
   public async start() {
     await this.runServer()
       .then(async () => {
-        await this.stop();
+        await this.prisma.$disconnect();
       })
       .catch(async (e) => {
         this.prismaLogger.error(e);
@@ -90,7 +112,7 @@ class Server {
   public async stop() {
     this.app.removeAllListeners();
     await this.prisma.$disconnect();
-    this.serverLogger.info('Server stopped');
+    this.serverLogger.info('🪦 Server stopped');
   }
 }
 

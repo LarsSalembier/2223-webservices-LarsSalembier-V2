@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import { Context, Next } from 'koa';
+import ServiceError, { ServiceErrorType } from '../core/ServiceError.js';
 
 interface ErrorDetail {
   type: string;
@@ -47,7 +48,7 @@ class Validator {
           });
         }
 
-        return resultObj;
+        return result;
       },
       {}
     );
@@ -57,10 +58,18 @@ class Validator {
     const mergedSchema = { ...DEFAULT_SCHEMA, ...schema };
 
     return (ctx: Context, next: Next) => {
-      const errors: { params?: ValidationErrorDetails } = {};
+      const errors: {
+        params?: ValidationErrorDetails;
+        query?: ValidationErrorDetails;
+        body?: ValidationErrorDetails;
+      } = {};
 
       const { error: paramsError, value: paramsValue }: Joi.ValidationResult =
         mergedSchema.params.validate(ctx.params, Validator.JOI_OPTIONS);
+      const { error: queryError, value: queryValue }: Joi.ValidationResult =
+        mergedSchema.query.validate(ctx.query, Validator.JOI_OPTIONS);
+      const { error: bodyError, value: bodyValue }: Joi.ValidationResult =
+        mergedSchema.body.validate(ctx.request.body, Validator.JOI_OPTIONS);
 
       if (paramsError) {
         errors.params = Validator.cleanupJoiError(paramsError);
@@ -68,15 +77,26 @@ class Validator {
         ctx.params = paramsValue;
       }
 
+      if (queryError) {
+        errors.query = Validator.cleanupJoiError(queryError);
+      } else {
+        ctx.query = queryValue;
+      }
+
+      if (bodyError) {
+        errors.body = Validator.cleanupJoiError(bodyError);
+      } else {
+        ctx.request.body = bodyValue;
+      }
+
       if (Object.keys(errors).length) {
-        ctx.throw(
-          400,
+        const error = new ServiceError(
+          ServiceErrorType.VALIDATION_FAILED,
           'Validation failed, check details for more information',
-          {
-            code: 'VALIDATION_FAILED',
-            details: errors,
-          }
+          errors
         );
+
+        ctx.throw(400, '', error);
       }
 
       return next();

@@ -14,6 +14,14 @@ class PersonRouter {
     this.router = router;
     this.personService = personService;
 
+    this.getAllPeople = this.getAllPeople.bind(this);
+    this.getPeopleCount = this.getPeopleCount.bind(this);
+    this.getPersonById = this.getPersonById.bind(this);
+    this.createPerson = this.createPerson.bind(this);
+    this.updatePerson = this.updatePerson.bind(this);
+    this.deletePerson = this.deletePerson.bind(this);
+    this.deleteAllPeople = this.deleteAllPeople.bind(this);
+
     router.get(
       '/api/people',
       Validator.validate(schemas.getAllPeople),
@@ -68,12 +76,7 @@ class PersonRouter {
   }
 
   async getPersonById(ctx: Context) {
-    const person = await this.personService.getById(ctx.context.id);
-
-    if (!person) {
-      ctx.status = 404;
-      return;
-    }
+    const person = await this.personService.getById(ctx.params.id);
 
     ctx.body = person;
   }
@@ -90,39 +93,19 @@ class PersonRouter {
   async updatePerson(ctx: Context) {
     const inputData = ctx.request.body as Partial<Omit<Person, 'id'>>;
 
-    const updatedPerson = await this.personService.update(
-      ctx.params.id,
-      inputData
-    );
-
-    if (!updatedPerson) {
-      ctx.status = 404;
-      return;
-    }
+    await this.personService.update(ctx.params.id, inputData);
 
     ctx.status = 204;
   }
 
   async deletePerson(ctx: Context) {
-    const deletedPerson = await this.personService.delete(ctx.params.id);
-
-    if (!deletedPerson) {
-      ctx.status = 404;
-      return;
-    }
+    await this.personService.delete(ctx.params.id);
 
     ctx.status = 204;
   }
 
   async deleteAllPeople(ctx: Context) {
-    const count = await this.personService.count();
-    const amountDeleted = await this.personService.deleteAll();
-
-    if (amountDeleted !== count) {
-      ctx.status = 500;
-      ctx.body = 'Some people in the request did not exist.';
-      return;
-    }
+    await this.personService.deleteAll();
 
     ctx.status = 204;
   }

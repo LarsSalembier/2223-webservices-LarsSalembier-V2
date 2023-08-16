@@ -26,7 +26,11 @@ const customFormat = winston.format.printf(
 class CustomLogger {
   private logger: winston.Logger;
 
-  constructor(name: string) {
+  private enabled: boolean;
+
+  constructor(name: string, enabled: boolean = LOG_ENABLED) {
+    this.enabled = enabled;
+
     const transports: winston.transport[] = [];
 
     // Add file transports if logging to file is enabled
@@ -43,7 +47,7 @@ class CustomLogger {
     }
 
     // Add console transport if logging to console is enabled
-    if (LOG_TO_CONSOLE) {
+    if (LOG_TO_CONSOLE && this.enabled) {
       transports.push(new winston.transports.Console());
     }
 
@@ -59,38 +63,38 @@ class CustomLogger {
     });
   }
 
-  public log(level: LogLevel, message: string): void {
+  public log(level: LogLevel, message: string, ...meta: unknown[]): void {
     if (LOG_ENABLED) {
-      this.logger.log(level, message);
+      this.logger.log(level, message, ...meta);
     }
   }
 
-  public error(message: string): void {
-    this.log(LogLevel.ERROR, message);
+  public error(message: string, ...meta: unknown[]): void {
+    this.logger.error(message, ...meta);
   }
 
-  public warn(message: string): void {
-    this.log(LogLevel.WARN, message);
+  public warn(message: string, ...meta: unknown[]): void {
+    this.log(LogLevel.WARN, message, ...meta);
   }
 
-  public info(message: string): void {
-    this.log(LogLevel.INFO, message);
+  public info(message: string, ...meta: unknown[]): void {
+    this.log(LogLevel.INFO, message, ...meta);
   }
 
-  public http(message: string): void {
-    this.log(LogLevel.HTTP, message);
+  public http(message: string, ...meta: unknown[]): void {
+    this.log(LogLevel.HTTP, message, ...meta);
   }
 
-  public verbose(message: string): void {
-    this.log(LogLevel.VERBOSE, message);
+  public verbose(message: string, ...meta: unknown[]): void {
+    this.log(LogLevel.VERBOSE, message, ...meta);
   }
 
-  public debug(message: string): void {
-    this.log(LogLevel.DEBUG, message);
+  public debug(message: string, ...meta: unknown[]): void {
+    this.log(LogLevel.DEBUG, message, ...meta);
   }
 
-  public silly(message: string): void {
-    this.log(LogLevel.SILLY, message);
+  public silly(message: string, ...meta: unknown[]): void {
+    this.log(LogLevel.SILLY, message, ...meta);
   }
 }
 
