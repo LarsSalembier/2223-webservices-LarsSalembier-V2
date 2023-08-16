@@ -57,8 +57,7 @@ model Event {
 }
 
 model Administrator {
-  id Int @id @default(autoincrement())
+  auth0id String @id
   username String @unique
-  password String
   email String
 }

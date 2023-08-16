@@ -1,21 +1,16 @@
 import Joi from 'joi';
-import { ValidationSchema } from './validation.js';
-
-interface ValidationSchemas {
-  [key: string]: Partial<ValidationSchema>;
-}
+import { ValidationSchemas } from './validation.js';
 
 const schemas: ValidationSchemas = {
-  getAllPeople: {},
-  getPeopleCount: {},
-  getPersonById: {
+  getAll: {},
+  getById: {
     params: Joi.object({
       id: Joi.number().integer().required().min(1),
     }),
   },
-  createPerson: {
+  create: {
     body: Joi.object({
-      name: Joi.string().max(100).required().trim(),
+      name: Joi.string().max(100).min(3).required().trim(),
       email: Joi.string().email().trim().optional(),
       phoneNumber: Joi.string().max(20).trim().optional(),
       bio: Joi.string().max(500).trim().optional(),
@@ -23,7 +18,7 @@ const schemas: ValidationSchemas = {
       birthdate: Joi.date().iso().greater('1900-01-01').less('now').optional(),
     }),
   },
-  updatePerson: {
+  update: {
     params: Joi.object({
       id: Joi.number().integer().required().min(1),
     }),
@@ -36,12 +31,13 @@ const schemas: ValidationSchemas = {
       birthdate: Joi.date().iso().greater('1900-01-01').less('now'),
     }),
   },
-  deletePerson: {
+  delete: {
     params: Joi.object({
       id: Joi.number().integer().required().min(1),
     }),
   },
-  deleteAllPeople: {},
+  deleteAll: {},
+  count: {},
 };
 
 export default schemas;

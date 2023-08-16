@@ -1,18 +1,18 @@
 import Router from '@koa/router';
-import { Person } from '@prisma/client';
+import { Administrator } from '@prisma/client';
 import { Context } from 'koa';
-import PersonService from '../service/person.js';
 import Validator from '../validation/validation.js';
-import schemas from '../validation/person.js';
+import schemas from '../validation/administrator.js';
+import AdministratorService from '../service/administrator.js';
 
-const PATH = '/api/people';
+const PATH = '/api/administrators';
 
-class PersonRouter {
+class AdministratorRouter {
   public readonly router: Router;
 
-  private readonly service: PersonService;
+  private readonly service: AdministratorService;
 
-  constructor(router: Router, service: PersonService) {
+  constructor(router: Router, service: AdministratorService) {
     this.router = router;
     this.service = service;
 
@@ -48,27 +48,29 @@ class PersonRouter {
   }
 
   async getAll(ctx: Context) {
-    const people = await this.service.getAll();
-    ctx.body = people;
+    const administrators = await this.service.getAll();
+    ctx.body = administrators;
   }
 
   async getById(ctx: Context) {
-    const person = await this.service.getById(ctx.params.id);
+    const administrator = await this.service.getById(ctx.params.id);
 
-    ctx.body = person;
+    ctx.body = administrator;
   }
 
   async create(ctx: Context) {
-    const inputData = ctx.request.body as Omit<Person, 'id'>;
+    const inputData = ctx.request.body as Administrator;
 
     const createdPerson = await this.service.create(inputData);
 
     ctx.status = 201;
-    ctx.set('Location', `/api/people/${createdPerson.id}`);
+    ctx.set('Location', `/api/administrator/${createdPerson.auth0id}`);
   }
 
   async update(ctx: Context) {
-    const inputData = ctx.request.body as Partial<Omit<Person, 'id'>>;
+    const inputData = ctx.request.body as Partial<
+      Omit<Administrator, 'auth0id'>
+    >;
 
     await this.service.update(ctx.params.id, inputData);
 
@@ -93,4 +95,4 @@ class PersonRouter {
   }
 }
 
-export default PersonRouter;
+export default AdministratorRouter;

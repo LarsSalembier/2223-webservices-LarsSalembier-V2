@@ -17,6 +17,10 @@ export interface ValidationSchema {
   body: Joi.Schema;
 }
 
+export interface ValidationSchemas {
+  [key: string]: Partial<ValidationSchema>;
+}
+
 const DEFAULT_SCHEMA: ValidationSchema = {
   query: Joi.object(),
   body: Joi.object(),

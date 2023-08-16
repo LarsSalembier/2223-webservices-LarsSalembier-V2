@@ -11,6 +11,7 @@ import CustomLogger from './CustomLogger.js';
 import CustomPrismaClient from './CustomPrismaClient.js';
 import RequestLogger from './RequestLogger.js';
 import ErrorHandler from './ErrorHandler.js';
+import Auth from './Auth.js';
 
 const PORT = 9000;
 
@@ -78,6 +79,15 @@ class Server {
 
     // setup error handler
     this.app.use(this.errorHandler.koaMiddleware);
+
+    this.app.use(Auth.checkJsonWebToken());
+
+    // this.app.use(async (ctx, next) => {
+    //   this.serverLogger.debug(ctx.headers.authorization ?? 'werkt niet'); // 👈 1
+    //   this.serverLogger.debug(JSON.stringify(ctx.state.user)); // 👈 2
+    //   this.serverLogger.debug(ctx.state.jwtOriginalError); // 👈 3
+    //   await next();
+    // });
 
     // setup body parser
     this.app.use(bodyParser());
