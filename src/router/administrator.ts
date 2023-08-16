@@ -27,17 +27,21 @@ class AdministratorRouter {
     router.get(PATH, Validator.validate(schemas.getAll), this.getAll);
 
     router.get(
-      `${PATH}/:id`,
+      `${PATH}/:auth0id`,
       Validator.validate(schemas.getById),
       this.getById
     );
 
     router.post(PATH, Validator.validate(schemas.create), this.create);
 
-    router.put(`${PATH}/:id`, Validator.validate(schemas.update), this.update);
+    router.put(
+      `${PATH}/:auth0id`,
+      Validator.validate(schemas.update),
+      this.update
+    );
 
     router.delete(
-      `${PATH}/:id`,
+      `${PATH}/:auth0id`,
       Validator.validate(schemas.delete),
       this.delete
     );
@@ -53,7 +57,7 @@ class AdministratorRouter {
   }
 
   async getById(ctx: Context) {
-    const administrator = await this.service.getById(ctx.params.id);
+    const administrator = await this.service.getById(ctx.params.auth0id);
 
     ctx.body = administrator;
   }
@@ -72,13 +76,13 @@ class AdministratorRouter {
       Omit<Administrator, 'auth0id'>
     >;
 
-    await this.service.update(ctx.params.id, inputData);
+    await this.service.update(ctx.params.auth0id, inputData);
 
     ctx.status = 204;
   }
 
   async delete(ctx: Context) {
-    await this.service.delete(ctx.params.id);
+    await this.service.delete(ctx.params.auth0id);
 
     ctx.status = 204;
   }
