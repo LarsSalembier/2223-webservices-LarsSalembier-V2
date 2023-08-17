@@ -11,7 +11,7 @@ const schemas: ValidationSchemas = {
   create: {
     body: Joi.object({
       auth0id: Joi.string().required(),
-      username: Joi.string().required().max(100).min(3),
+      username: Joi.string().required().max(30).min(3),
       email: Joi.string().required().email(),
     }),
   },
@@ -20,8 +20,8 @@ const schemas: ValidationSchemas = {
       auth0id: Joi.string().required(),
     }),
     body: Joi.object({
-      username: Joi.string().required().max(100).min(3),
-      email: Joi.string().required().email(),
+      username: Joi.string().max(30).min(3).optional(),
+      email: Joi.string().email().optional(),
     }),
   },
   delete: {

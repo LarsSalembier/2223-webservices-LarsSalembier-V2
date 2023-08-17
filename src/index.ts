@@ -5,7 +5,7 @@ import Server from './core/Server.js';
 async function main() {
   try {
     const shouldSeed: boolean = config.get('database.seed');
-    const server = new Server(shouldSeed);
+    const server = new Server(9000, shouldSeed);
     await server.start();
 
     const onClose = async () => {

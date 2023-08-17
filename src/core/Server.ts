@@ -13,9 +13,9 @@ import RequestLogger from './RequestLogger.js';
 import ErrorHandler from './ErrorHandler.js';
 import Auth from './Auth.js';
 
-const PORT = 9000;
-
 class Server {
+  private readonly port: number;
+
   private readonly serverLogger: CustomLogger;
 
   private readonly prismaLogger: CustomLogger;
@@ -36,7 +36,10 @@ class Server {
 
   public readonly app: Koa;
 
-  constructor(seedDatabase: boolean = false) {
+  constructor(port: number, seedDatabase: boolean = false) {
+    // setup port
+    this.port = port;
+
     // setup loggers
     this.serverLogger = new CustomLogger('Server');
     this.prismaLogger = new CustomLogger('Prisma', false);
@@ -101,7 +104,7 @@ class Server {
     }
 
     // start server
-    this.app.listen(PORT);
+    this.app.listen(this.port);
 
     // log server startup
     this.serverLogger.info(`🚀 Server listening on http://localhost:9000`);

@@ -17,7 +17,6 @@ class AdministratorRouter {
     this.service = service;
 
     this.getAll = this.getAll.bind(this);
-    this.count = this.count.bind(this);
     this.getById = this.getById.bind(this);
     this.create = this.create.bind(this);
     this.update = this.update.bind(this);
@@ -47,8 +46,6 @@ class AdministratorRouter {
     );
 
     router.delete(PATH, Validator.validate(schemas.deleteAll), this.deleteAll);
-
-    router.get(`${PATH}/count`, Validator.validate(schemas.count), this.count);
   }
 
   async getAll(ctx: Context) {
@@ -68,7 +65,7 @@ class AdministratorRouter {
     const createdPerson = await this.service.create(inputData);
 
     ctx.status = 201;
-    ctx.set('Location', `/api/administrator/${createdPerson.auth0id}`);
+    ctx.body = createdPerson;
   }
 
   async update(ctx: Context) {
@@ -76,9 +73,10 @@ class AdministratorRouter {
       Omit<Administrator, 'auth0id'>
     >;
 
-    await this.service.update(ctx.params.auth0id, inputData);
+    const result = await this.service.update(ctx.params.auth0id, inputData);
 
-    ctx.status = 204;
+    ctx.status = 200;
+    ctx.body = result;
   }
 
   async delete(ctx: Context) {
@@ -91,11 +89,6 @@ class AdministratorRouter {
     await this.service.deleteAll();
 
     ctx.status = 204;
-  }
-
-  async count(ctx: Context) {
-    const count = await this.service.count();
-    ctx.body = count;
   }
 }
 

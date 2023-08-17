@@ -62,15 +62,16 @@ class PersonRouter {
     const createdPerson = await this.service.create(inputData);
 
     ctx.status = 201;
-    ctx.set('Location', `/api/people/${createdPerson.id}`);
+    ctx.body = createdPerson;
   }
 
   async update(ctx: Context) {
     const inputData = ctx.request.body as Partial<Omit<Person, 'id'>>;
 
-    await this.service.update(ctx.params.id, inputData);
+    const result = await this.service.update(ctx.params.id, inputData);
 
-    ctx.status = 204;
+    ctx.body = result;
+    ctx.status = 200;
   }
 
   async delete(ctx: Context) {

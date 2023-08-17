@@ -35,9 +35,9 @@ class ErrorHandler {
           message: `Unknown resource: ${ctx.url}`,
           details: {},
         };
-      }
 
-      ctx.status = 404;
+        ctx.status = 404;
+      }
     } catch (err) {
       if (!(err instanceof Error)) {
         throw new TypeError('Caught exception is not an Error instance.');
@@ -45,7 +45,9 @@ class ErrorHandler {
 
       const safeError: ExtendedError = err;
 
-      this.logger.error(`Error occured while handling a request: ${err}`);
+      this.logger.error(`Error occured while handling a request: ${safeError}`);
+      this.logger.error(`Error type: ${safeError.type}`);
+      this.logger.error(`Error details: ${JSON.stringify(safeError.details)}`);
 
       let statusCode = safeError.status || 500;
 

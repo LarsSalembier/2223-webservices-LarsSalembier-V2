@@ -8,8 +8,8 @@
     "start:dev": "npx env-cmd -f .env.development nodemon src/index.ts",
     "start:prod": "npx env-cmd -f .env.production ts-node src/index.ts",
     "lint": "eslint . --ext .ts --cache --fix",
-    "test": "npx env-cmd -f .env.test vitest",
-    "test:coverage": "npx env-cmd -f .env.test vitest --coverage",
+    "test": "npx env-cmd -f .env.test vitest --threads=false",
+    "test:coverage": "npx env-cmd -f .env.test vitest --coverage --threads=false",
     "setup:dev": "npx env-cmd -f .env.development prisma generate && npx env-cmd -f .env.development prisma migrate dev",
     "setup:test": "npx env-cmd -f .env.test prisma generate && npx env-cmd -f .env.test prisma migrate deploy",
     "setup:prod": "npx env-cmd -f .env.production prisma generate && npx env-cmd -f .env.production prisma migrate deploy"

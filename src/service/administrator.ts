@@ -1,6 +1,5 @@
-import { Administrator, PrismaClient } from '@prisma/client';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library.js';
-import ServiceError from '../core/ServiceError.js';
+import { Administrator, Prisma, PrismaClient } from '@prisma/client';
+import ServiceError, { ServiceErrorType } from '../core/ServiceError.js';
 
 class AdministratorService {
   private readonly prisma;
@@ -29,10 +28,35 @@ class AdministratorService {
     return administrator;
   }
 
-  async create(data: Administrator): Promise<Administrator> {
-    return this.prisma.administrator.create({
-      data,
+  async getByUsername(username: string): Promise<Administrator> {
+    const administrator = await this.prisma.administrator.findUnique({
+      where: {
+        username,
+      },
     });
+
+    if (!administrator) {
+      throw ServiceError.notFound(
+        `There is no administrator with username ${username}`
+      );
+    }
+
+    return administrator;
+  }
+
+  async create(data: Administrator): Promise<Administrator> {
+    try {
+      return await this.prisma.administrator.create({ data });
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError) {
+        if (err.code === 'P2002') {
+          throw ServiceError.conflict(
+            `An administrator with auth0id ${data.auth0id} and/or username ${data.username} already exists`
+          );
+        }
+      }
+      throw err;
+    }
   }
 
   async createMany(data: Administrator[]): Promise<Administrator[]> {
@@ -54,10 +78,15 @@ class AdministratorService {
         data,
       });
     } catch (e) {
-      if (e instanceof PrismaClientKnownRequestError) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2025') {
           throw ServiceError.notFound(
             `There is no administrator with auth0id ${auth0id}`
+          );
+        }
+        if (e.code === 'P2002') {
+          throw ServiceError.conflict(
+            `That username (${data.username}) is already in use`
           );
         }
       }
@@ -73,7 +102,7 @@ class AdministratorService {
         },
       });
     } catch (e) {
-      if (e instanceof PrismaClientKnownRequestError)
+      if (e instanceof Prisma.PrismaClientKnownRequestError)
         if (e.code === 'P2025') {
           throw ServiceError.notFound(
             `There is no administrator with auth0id ${auth0id}`
@@ -99,10 +128,6 @@ class AdministratorService {
     const batchPayload = await this.prisma.administrator.deleteMany();
 
     return batchPayload.count;
-  }
-
-  async count(): Promise<number> {
-    return this.prisma.administrator.count();
   }
 }
 
