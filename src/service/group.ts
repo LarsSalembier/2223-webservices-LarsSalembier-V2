@@ -1,51 +1,51 @@
-import { Person, PrismaClient } from '@prisma/client';
+import { Group, PrismaClient } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library.js';
 import ServiceError from '../core/ServiceError.js';
 
-class PersonService {
+class GroupService {
   private readonly prisma;
 
   constructor(prismaClient: PrismaClient) {
     this.prisma = prismaClient;
   }
 
-  async getAll(): Promise<Person[]> {
-    const data = await this.prisma.person.findMany();
+  async getAll(): Promise<Group[]> {
+    const data = await this.prisma.group.findMany();
 
     return data;
   }
 
-  async getById(id: number): Promise<Person> {
-    const data = await this.prisma.person.findUnique({
+  async getById(id: number): Promise<Group> {
+    const data = await this.prisma.group.findUnique({
       where: {
         id,
       },
     });
 
     if (!data) {
-      throw ServiceError.notFound(`There is no person with id ${id}`);
+      throw ServiceError.notFound(`There is no group with id ${id}`);
     }
 
     return data;
   }
 
-  async create(data: Omit<Person, 'id'>): Promise<Person> {
-    const createdEntity = await this.prisma.person.create({
+  async create(data: Omit<Group, 'id'>): Promise<Group> {
+    const createdEntity = await this.prisma.group.create({
       data,
     });
 
     return createdEntity;
   }
 
-  async createMany(data: Omit<Person, 'id'>[]): Promise<Person[]> {
+  async createMany(data: Omit<Group, 'id'>[]): Promise<Group[]> {
     const creationPromises = data.map((entity) => this.create(entity));
 
     return Promise.all(creationPromises);
   }
 
-  async update(id: number, data: Partial<Omit<Person, 'id'>>): Promise<Person> {
+  async update(id: number, data: Partial<Omit<Group, 'id'>>): Promise<Group> {
     try {
-      return await this.prisma.person.update({
+      return await this.prisma.group.update({
         where: {
           id,
         },
@@ -54,16 +54,16 @@ class PersonService {
     } catch (e) {
       if (e instanceof PrismaClientKnownRequestError) {
         if (e.code === 'P2025') {
-          throw ServiceError.notFound(`There is no person with id ${id}`);
+          throw ServiceError.notFound(`There is no group with id ${id}`);
         }
       }
       throw e;
     }
   }
 
-  async delete(id: number): Promise<Person> {
+  async delete(id: number): Promise<Group> {
     try {
-      return await this.prisma.person.delete({
+      return await this.prisma.group.delete({
         where: {
           id,
         },
@@ -71,14 +71,14 @@ class PersonService {
     } catch (e) {
       if (e instanceof PrismaClientKnownRequestError)
         if (e.code === 'P2025') {
-          throw ServiceError.notFound(`There is no person with id ${id}`);
+          throw ServiceError.notFound(`There is no group with id ${id}`);
         }
       throw e;
     }
   }
 
   async deleteMany(ids: number[]): Promise<number> {
-    const batchPayload = await this.prisma.person.deleteMany({
+    const batchPayload = await this.prisma.group.deleteMany({
       where: {
         id: {
           in: ids,
@@ -90,10 +90,10 @@ class PersonService {
   }
 
   async deleteAll(): Promise<number> {
-    const batchPayload = await this.prisma.person.deleteMany({});
+    const batchPayload = await this.prisma.group.deleteMany({});
 
     return batchPayload.count;
   }
 }
 
-export default PersonService;
+export default GroupService;

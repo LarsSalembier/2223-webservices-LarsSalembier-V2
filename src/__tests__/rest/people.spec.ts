@@ -4,7 +4,15 @@ import supertest from 'supertest';
 import { Person } from '@prisma/client';
 import Server from '../../core/Server.js';
 import PersonSeeder from '../../seeders/person.js';
-import { StringifiedPersonData as IncomingPersonData } from '../../typings/Person.js';
+
+type IncomingPersonData = {
+  name: string;
+  email?: string;
+  phoneNumber?: string;
+  bio?: string;
+  studiesOrJob?: string;
+  birthdate?: string;
+};
 
 const AMOUNT_OF_PEOPLE = 5;
 

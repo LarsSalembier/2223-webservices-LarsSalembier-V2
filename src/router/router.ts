@@ -2,6 +2,7 @@ import KoaRouter from '@koa/router';
 import Service from '../service/service.js';
 import PersonRouter from './person.js';
 import AdministratorRouter from './administrator.js';
+import GroupRouter from './group.js';
 
 class Router {
   private readonly router: KoaRouter;
@@ -11,6 +12,8 @@ class Router {
   public readonly personRouter: PersonRouter;
 
   public readonly administratorRouter: AdministratorRouter;
+
+  public readonly groupRouter: GroupRouter;
 
   constructor(router: KoaRouter, service: Service) {
     this.router = router;
@@ -25,6 +28,8 @@ class Router {
       this.router,
       this.service.administratorService
     );
+
+    this.groupRouter = new GroupRouter(this.router, this.service.groupService);
   }
 
   public routes() {

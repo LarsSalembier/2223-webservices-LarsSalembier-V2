@@ -1,5 +1,5 @@
 import { Administrator, Prisma, PrismaClient } from '@prisma/client';
-import ServiceError, { ServiceErrorType } from '../core/ServiceError.js';
+import ServiceError from '../core/ServiceError.js';
 
 class AdministratorService {
   private readonly prisma;
@@ -13,35 +13,19 @@ class AdministratorService {
   }
 
   async getById(auth0id: string): Promise<Administrator> {
-    const administrator = await this.prisma.administrator.findUnique({
+    const data = await this.prisma.administrator.findUnique({
       where: {
         auth0id,
       },
     });
 
-    if (!administrator) {
+    if (!data) {
       throw ServiceError.notFound(
         `There is no administrator with auth0id ${auth0id}`
       );
     }
 
-    return administrator;
-  }
-
-  async getByUsername(username: string): Promise<Administrator> {
-    const administrator = await this.prisma.administrator.findUnique({
-      where: {
-        username,
-      },
-    });
-
-    if (!administrator) {
-      throw ServiceError.notFound(
-        `There is no administrator with username ${username}`
-      );
-    }
-
-    return administrator;
+    return data;
   }
 
   async create(data: Administrator): Promise<Administrator> {
@@ -60,9 +44,8 @@ class AdministratorService {
   }
 
   async createMany(data: Administrator[]): Promise<Administrator[]> {
-    const creationPromises = data.map((administrator) =>
-      this.create(administrator)
-    );
+    const creationPromises = data.map((entity) => this.create(entity));
+
     return Promise.all(creationPromises);
   }
 

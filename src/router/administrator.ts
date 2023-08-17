@@ -49,45 +49,33 @@ class AdministratorRouter {
   }
 
   async getAll(ctx: Context) {
-    const administrators = await this.service.getAll();
-    ctx.body = administrators;
+    ctx.body = await this.service.getAll();
   }
 
   async getById(ctx: Context) {
-    const administrator = await this.service.getById(ctx.params.auth0id);
-
-    ctx.body = administrator;
+    ctx.body = await this.service.getById(ctx.params.auth0id);
   }
 
   async create(ctx: Context) {
-    const inputData = ctx.request.body as Administrator;
-
-    const createdPerson = await this.service.create(inputData);
-
+    ctx.body = await this.service.create(ctx.request.body as Administrator);
     ctx.status = 201;
-    ctx.body = createdPerson;
   }
 
   async update(ctx: Context) {
-    const inputData = ctx.request.body as Partial<
-      Omit<Administrator, 'auth0id'>
-    >;
-
-    const result = await this.service.update(ctx.params.auth0id, inputData);
-
+    ctx.body = await this.service.update(
+      ctx.params.auth0id,
+      ctx.request.body as Partial<Omit<Administrator, 'auth0id'>>
+    );
     ctx.status = 200;
-    ctx.body = result;
   }
 
   async delete(ctx: Context) {
     await this.service.delete(ctx.params.auth0id);
-
     ctx.status = 204;
   }
 
   async deleteAll(ctx: Context) {
     await this.service.deleteAll();
-
     ctx.status = 204;
   }
 }

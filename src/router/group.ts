@@ -1,18 +1,18 @@
 import Router from '@koa/router';
-import { Person } from '@prisma/client';
+import { Group } from '@prisma/client';
 import { Context } from 'koa';
-import PersonService from '../service/person.js';
 import Validator from '../validation/validation.js';
-import schemas from '../validation/person.js';
+import schemas from '../validation/group.js';
+import GroupService from '../service/group.js';
 
-const PATH = '/api/people';
+const PATH = '/api/groups';
 
-class PersonRouter {
+class GroupRouter {
   public readonly router: Router;
 
-  private readonly service: PersonService;
+  private readonly service: GroupService;
 
-  constructor(router: Router, service: PersonService) {
+  constructor(router: Router, service: GroupService) {
     this.router = router;
     this.service = service;
 
@@ -53,16 +53,14 @@ class PersonRouter {
   }
 
   async create(ctx: Context) {
-    ctx.body = await this.service.create(
-      ctx.request.body as Omit<Person, 'id'>
-    );
+    ctx.body = await this.service.create(ctx.request.body as Omit<Group, 'id'>);
     ctx.status = 201;
   }
 
   async update(ctx: Context) {
     ctx.body = await this.service.update(
       ctx.params.id,
-      ctx.request.body as Partial<Omit<Person, 'id'>>
+      ctx.request.body as Partial<Omit<Group, 'id'>>
     );
     ctx.status = 200;
   }
@@ -78,4 +76,4 @@ class PersonRouter {
   }
 }
 
-export default PersonRouter;
+export default GroupRouter;

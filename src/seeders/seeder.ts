@@ -5,9 +5,11 @@ import PersonSeeder from './person.js';
 class Seeder {
   private readonly service: Service;
 
-  public readonly personSeeder: PersonSeeder;
+  private readonly personSeeder: PersonSeeder;
 
-  public readonly administratorSeeder: AdministratorSeeder;
+  private readonly administratorSeeder: AdministratorSeeder;
+
+  private readonly groupSeeder: PersonSeeder;
 
   constructor(service: Service) {
     this.service = service;
@@ -15,11 +17,13 @@ class Seeder {
     this.administratorSeeder = new AdministratorSeeder(
       this.service.administratorService
     );
+    this.groupSeeder = new PersonSeeder(this.service.personService);
   }
 
   public async run(): Promise<void> {
     await this.personSeeder.run();
     await this.administratorSeeder.run();
+    await this.groupSeeder.run();
   }
 }
 
