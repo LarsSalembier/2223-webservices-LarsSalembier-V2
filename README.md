@@ -10,42 +10,81 @@ Ik verwacht dat volgende software reeds geïnstalleerd is:
 
 - [NodeJS](https://nodejs.org)
 - [Yarn](https://yarnpkg.com)
-- [MySQL Community Server](https://dev.mysql.com/downloads/mysql/)
 
 ## Opstarten
 
-### `.env`-bestand
+### `.env`-bestanden
 
-Om deze API te starten maak je een `.env` bestand aan in de root van deze directory met de volgende inhoud:
+Om deze API te starten heb je `.env`-bestanden nodig, meerbepaald 3:
 
-```
-NODE_ENV="development"
-DATABASE_USERNAME="root"
-DATABASE_PASSWORD=""
-```
+- `.env.development`: voor development
+- `.env.test`: voor testen
+- `.env.production`: voor production
 
-Vervang de waarden van de variabelen `DATABASE_USERNAME` en `DATABASE_PASSWORD` door de gebruikersnaam en het wachtwoord van je lokale database.
-
-Wanneer de database host of poort verschillen van onze standaardwaarden, kan je het `.env`-bestand ook uitbreiden met de volgende configuraties:
+Maak deze 3 bestanden aan en plaats in alle 3 de volgende regels:
 
 ```
-DATABASE_HOST="localhost"
-DATABASE_PORT=3306
+AUTH_JWKS_URI='https://voorbeeld.eu.auth0.com/.well-known/jwks.json'
+AUTH_AUDIENCE='https://api.voorbeeld.be'
+AUTH_ISSUER='https://voorbeeld.eu.auth0.com/'
+AUTH_USER_INFO='https://voorbeeld.eu.auth0.com/userinfo'
 ```
+
+Uiteraard vervang je de urls hier door de juiste urls voor jouw Auth0-applicatie
+
+Eventueel kun je nog de port aanpassen in de `.env`-bestanden, op deze manier:
+
+De standaardpoort is 9000.
+
+Nu voegen we de volgende specifieke regels toe:
+
+Aan `.env.development` voegen we toe:
+
+```
+NODE_ENV=development
+DATABASE_URL="file:./development.db"
+```
+
+Aan `.env.test` voegen we toe:
+
+```
+NODE_ENV=test
+DATABASE_URL="file:./test.db"
+```
+
+Aan `.env.production` voegen we toe:
+
+```
+NODE_ENV=production
+DATABASE_URL="file:./production.db"
+```
+
+Wanneer de poort verschilt van de standaardwaarde 9000, kan je de `.env`-bestanden ook uitbreiden met de volgende configuraties:
+
+```
+PORT=3000
+```
+
+### Database bouwen
+
+Bouw de development-database: `yarn setup:dev`
+
+Bouw de production-database: `yarn setup:prod`
+
+Bouw de test-database: `yarn setup:test`
 
 ### App starten
 
-Start de app in development-modus met het commando `yarn start`.
+Start de app in development-modus met het commando `yarn start:dev`.
 
-Start de app in production-modus met het commando `yarn start:prod`. We gaan er dan vanuit dat alle nodige omgevingsvariabelen zijn ingevuld, er wordt geen `.env`-bestand gelezen met dit commando.
+Start de app in production-modus met het commando `yarn start:prod`.
 
 ## Testen
 
-Maak een `.env.test` met een gelijkaardige configuratie als hierboven (gebruik een andere database).
+Voordat je de testen draait, moet je eerst de testdatabase bouwen: `yarn setup:test`. Zorg er ook voor dat je de `.env.test`-file hebt aangemaakt (zie hierboven).
 
 Voer de testen uit met `yarn test`. Om coverage te krijgen voer je `yarn test:coverage` uit.
 
 ## Veelvoorkomende errors
 
-- 'Modules not found'-errors: probeer het commando `yarn install`.
-- Migrations failed: probeer de bestaande `chirosite` database te droppen en probeer opnieuw.
+- 'Modules not found'-errors: probeer het commando `yarn install` of simpelweg `yarn` uit te voeren.
