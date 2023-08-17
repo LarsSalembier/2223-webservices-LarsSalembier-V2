@@ -1,5 +1,4 @@
-import { Person, PrismaClient } from '@prisma/client';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library.js';
+import { Person, Prisma, PrismaClient } from '@prisma/client';
 import ServiceError from '../core/ServiceError.js';
 
 class PersonService {
@@ -10,9 +9,7 @@ class PersonService {
   }
 
   async getAll(): Promise<Person[]> {
-    const data = await this.prisma.person.findMany();
-
-    return data;
+    return this.prisma.person.findMany();
   }
 
   async getById(id: number): Promise<Person> {
@@ -30,17 +27,13 @@ class PersonService {
   }
 
   async create(data: Omit<Person, 'id'>): Promise<Person> {
-    const createdEntity = await this.prisma.person.create({
+    return this.prisma.person.create({
       data,
     });
-
-    return createdEntity;
   }
 
   async createMany(data: Omit<Person, 'id'>[]): Promise<Person[]> {
-    const creationPromises = data.map((entity) => this.create(entity));
-
-    return Promise.all(creationPromises);
+    return Promise.all(data.map((entity) => this.create(entity)));
   }
 
   async update(id: number, data: Partial<Omit<Person, 'id'>>): Promise<Person> {
@@ -52,7 +45,7 @@ class PersonService {
         data,
       });
     } catch (e) {
-      if (e instanceof PrismaClientKnownRequestError) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2025') {
           throw ServiceError.notFound(`There is no person with id ${id}`);
         }
@@ -69,7 +62,7 @@ class PersonService {
         },
       });
     } catch (e) {
-      if (e instanceof PrismaClientKnownRequestError)
+      if (e instanceof Prisma.PrismaClientKnownRequestError)
         if (e.code === 'P2025') {
           throw ServiceError.notFound(`There is no person with id ${id}`);
         }

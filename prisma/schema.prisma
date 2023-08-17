@@ -37,11 +37,13 @@ model Group {
 }
 
 model Membership {
-  id Int @id @default(autoincrement())
   personId Int
   groupId Int
   person Person @relation(fields: [personId], references: [id])
   group Group @relation(fields: [groupId], references: [id])
+
+  @@id([personId, groupId])
+  @@unique([personId, groupId])
 }
 
 model Event {

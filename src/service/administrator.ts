@@ -44,9 +44,7 @@ class AdministratorService {
   }
 
   async createMany(data: Administrator[]): Promise<Administrator[]> {
-    const creationPromises = data.map((entity) => this.create(entity));
-
-    return Promise.all(creationPromises);
+    return Promise.all(data.map((entity) => this.create(entity)));
   }
 
   async update(

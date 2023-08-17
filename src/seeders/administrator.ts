@@ -21,10 +21,10 @@ class AdministratorSeeder {
     return this.service.create(AdministratorSeeder.generate());
   }
 
-  async run(): Promise<void> {
+  async run(): Promise<Administrator[]> {
     await this.service.deleteAll();
     const promises = Array.from({ length: 10 }).map(() => this.add());
-    await Promise.all(promises);
+    return Promise.all(promises);
   }
 }
 

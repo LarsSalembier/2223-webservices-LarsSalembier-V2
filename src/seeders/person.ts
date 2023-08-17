@@ -24,10 +24,10 @@ class PersonSeeder {
     return this.service.create(PersonSeeder.generate());
   }
 
-  async run(): Promise<void> {
+  async run(): Promise<Person[]> {
     await this.service.deleteAll();
     const promises = Array.from({ length: 10 }).map(() => this.add());
-    await Promise.all(promises);
+    return Promise.all(promises);
   }
 }
 

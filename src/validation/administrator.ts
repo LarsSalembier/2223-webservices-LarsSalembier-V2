@@ -30,7 +30,6 @@ const schemas: ValidationSchemas = {
     }),
   },
   deleteAll: {},
-  count: {},
 };
 
 export default schemas;

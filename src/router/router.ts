@@ -21,7 +21,9 @@ class Router {
 
     this.personRouter = new PersonRouter(
       this.router,
-      this.service.personService
+      this.service.groupService,
+      this.service.personService,
+      this.service.membershipService
     );
 
     this.administratorRouter = new AdministratorRouter(
@@ -29,7 +31,12 @@ class Router {
       this.service.administratorService
     );
 
-    this.groupRouter = new GroupRouter(this.router, this.service.groupService);
+    this.groupRouter = new GroupRouter(
+      this.router,
+      this.service.groupService,
+      this.service.personService,
+      this.service.membershipService
+    );
   }
 
   public routes() {

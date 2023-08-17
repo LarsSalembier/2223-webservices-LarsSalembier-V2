@@ -1,5 +1,4 @@
-import { Group, PrismaClient } from '@prisma/client';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library.js';
+import { Group, Prisma, PrismaClient } from '@prisma/client';
 import ServiceError from '../core/ServiceError.js';
 
 class GroupService {
@@ -10,9 +9,7 @@ class GroupService {
   }
 
   async getAll(): Promise<Group[]> {
-    const data = await this.prisma.group.findMany();
-
-    return data;
+    return this.prisma.group.findMany();
   }
 
   async getById(id: number): Promise<Group> {
@@ -30,17 +27,13 @@ class GroupService {
   }
 
   async create(data: Omit<Group, 'id'>): Promise<Group> {
-    const createdEntity = await this.prisma.group.create({
+    return this.prisma.group.create({
       data,
     });
-
-    return createdEntity;
   }
 
   async createMany(data: Omit<Group, 'id'>[]): Promise<Group[]> {
-    const creationPromises = data.map((entity) => this.create(entity));
-
-    return Promise.all(creationPromises);
+    return Promise.all(data.map((entity) => this.create(entity)));
   }
 
   async update(id: number, data: Partial<Omit<Group, 'id'>>): Promise<Group> {
@@ -52,7 +45,7 @@ class GroupService {
         data,
       });
     } catch (e) {
-      if (e instanceof PrismaClientKnownRequestError) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2025') {
           throw ServiceError.notFound(`There is no group with id ${id}`);
         }
@@ -69,7 +62,7 @@ class GroupService {
         },
       });
     } catch (e) {
-      if (e instanceof PrismaClientKnownRequestError)
+      if (e instanceof Prisma.PrismaClientKnownRequestError)
         if (e.code === 'P2025') {
           throw ServiceError.notFound(`There is no group with id ${id}`);
         }

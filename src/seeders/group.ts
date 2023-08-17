@@ -22,10 +22,10 @@ class GroupSeeder {
     return this.service.create(GroupSeeder.generate());
   }
 
-  async run(): Promise<void> {
+  async run(): Promise<Group[]> {
     await this.service.deleteAll();
     const promises = Array.from({ length: 10 }).map(() => this.add());
-    await Promise.all(promises);
+    return Promise.all(promises);
   }
 }
 
