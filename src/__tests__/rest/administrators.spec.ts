@@ -8,7 +8,7 @@ export const AMOUNT_OF_ADMINISTRATORS = 5;
 
 export const ADMINISTRATOR_PATH = '/api/administrators';
 
-const server = new Server(9000);
+const server = new Server(9001);
 
 const sortAdministrators = (a: Administrator, b: Administrator) => {
   return a.auth0id.localeCompare(b.auth0id);

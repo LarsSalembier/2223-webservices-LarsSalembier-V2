@@ -46,7 +46,11 @@ class ErrorHandler {
       const safeError: ExtendedError = err;
 
       this.logger.error(`Error occured while handling a request: ${safeError}`);
-      this.logger.error(`Error type: ${safeError.type}`);
+      this.logger.error(
+        `Error type: ${safeError.status ? '' : `${safeError.status} `}${
+          safeError.type
+        }`
+      );
       this.logger.error(`Error details: ${JSON.stringify(safeError.details)}`);
 
       let statusCode = safeError.status || 500;

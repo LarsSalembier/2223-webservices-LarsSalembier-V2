@@ -10,12 +10,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Article {
-  id Int @id @default(autoincrement())
-  title String
-  content String
-}
-
 model Person {
   id Int @id @default(autoincrement())
   name String
@@ -44,16 +38,6 @@ model Membership {
 
   @@id([personId, groupId])
   @@unique([personId, groupId])
-}
-
-model Event {
-  id Int @id @default(autoincrement())
-  name String
-  description String
-  image String?
-  startDateTime DateTime
-  endDateTime DateTime?
-  location String
 }
 
 model Administrator {

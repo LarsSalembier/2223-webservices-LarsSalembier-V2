@@ -22,6 +22,8 @@ class Server {
 
   private readonly requestLogger: RequestLogger;
 
+  private readonly seederLogger: CustomLogger;
+
   private readonly prisma: PrismaClient;
 
   private readonly service: Service;
@@ -47,6 +49,7 @@ class Server {
     this.requestLogger.koaMiddleware = this.requestLogger.koaMiddleware.bind(
       this.requestLogger
     );
+    this.seederLogger = new CustomLogger('Seeder');
 
     // setup prisma client
     this.prisma = new CustomPrismaClient(this.prismaLogger);
@@ -66,7 +69,7 @@ class Server {
 
     if (seedDatabase) {
       // setup seeds
-      this.seed = new Seeder(this.service);
+      this.seed = new Seeder(this.service, this.seederLogger);
     }
 
     // setup koa app
