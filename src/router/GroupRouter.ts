@@ -96,7 +96,6 @@ class GroupRouter {
     const { personId } = ctx.request.body as Omit<Membership, 'groupId'>;
 
     await this.groupService.addMember(id, personId);
-    ctx.body = `Person ${personId} added to group ${id}`;
     ctx.status = 201;
   }
 

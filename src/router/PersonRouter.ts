@@ -97,7 +97,6 @@ class PersonRouter {
 
     await this.personService.joinGroup(id, groupId);
 
-    ctx.body = `Person ${id} added to group ${groupId}`;
     ctx.status = 201;
   }
 
