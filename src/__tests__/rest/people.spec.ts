@@ -16,9 +16,9 @@ type IncomingPersonData = {
 
 const AMOUNT_OF_PEOPLE = 5;
 
-const PATH = '/api/people';
+export const PEOPLE_PATH = '/api/people';
 
-const server = new Server(9002);
+const server = new Server(9000);
 
 const sortPeople = (a: Omit<Person, 'id'>, b: Omit<Person, 'id'>) => {
   if (a.name < b.name) return -1;
@@ -32,7 +32,7 @@ const sortPeopleWithId = (a: Person, b: Person) => {
   return 0;
 };
 
-const people: Omit<Person, 'id'>[] = Array.from({
+export const PEOPLE: Omit<Person, 'id'>[] = Array.from({
   length: AMOUNT_OF_PEOPLE,
 })
   .map(() => PersonSeeder.generate())
@@ -40,13 +40,13 @@ const people: Omit<Person, 'id'>[] = Array.from({
 
 async function addAllPeople(request: supertest.SuperTest<supertest.Test>) {
   await Promise.all(
-    people.map((person) => {
-      return request.post(PATH).send(person);
+    PEOPLE.map((person) => {
+      return request.post(PEOPLE_PATH).send(person);
     })
   );
 }
 
-function incomingToReal(person: IncomingPersonData): Omit<Person, 'id'> {
+export function incomingToReal(person: IncomingPersonData): Omit<Person, 'id'> {
   return {
     name: person.name,
     email: person.email ?? null,
@@ -67,82 +67,86 @@ describe('people', () => {
 
   afterAll(async () => {
     await server.stop();
-    await request.delete(PATH);
+    await request.delete(PEOPLE_PATH);
   });
 
   beforeEach(async () => {
-    await request.delete(PATH);
+    await request.delete(PEOPLE_PATH);
   });
 
-  describe(`GET ${PATH}`, () => {
+  describe(`GET ${PEOPLE_PATH}`, () => {
     it('should return 200', async () => {
-      const response = await request.get(PATH);
+      const response = await request.get(PEOPLE_PATH);
       expect(response.status).toBe(200);
     });
 
     it('should return an array of people', async () => {
-      const response = await request.get(PATH);
+      const response = await request.get(PEOPLE_PATH);
       expect(response.body).toBeInstanceOf(Array);
     });
 
     it('should return the correct amount of people', async () => {
       await addAllPeople(request);
-      const response = await request.get(PATH);
-      expect(response.body.length).toBe(people.length);
+      const response = await request.get(PEOPLE_PATH);
+      expect(response.body.length).toBe(PEOPLE.length);
     });
 
     it('should return the correct people', async () => {
       await addAllPeople(request);
-      const response = await request.get(PATH);
+      const response = await request.get(PEOPLE_PATH);
       const sortedResponse = response.body.sort(sortPeopleWithId);
 
-      expect(sortedResponse.map(incomingToReal)).toEqual(people);
+      expect(sortedResponse.map(incomingToReal)).toEqual(PEOPLE);
     });
   });
 
-  describe(`GET ${PATH}/:id`, () => {
+  describe(`GET ${PEOPLE_PATH}/:id`, () => {
     it('should return 200', async () => {
-      const postResponse = await request.post(PATH).send(people[0]);
+      const postResponse = await request.post(PEOPLE_PATH).send(PEOPLE[0]);
 
-      const response = await request.get(`${PATH}/${postResponse.body.id}`);
+      const response = await request.get(
+        `${PEOPLE_PATH}/${postResponse.body.id}`
+      );
 
       expect(response.status).toBe(200);
     });
 
     it('should return the correct person', async () => {
-      const postResponse = await request.post(PATH).send(people[0]);
+      const postResponse = await request.post(PEOPLE_PATH).send(PEOPLE[0]);
 
-      const response = await request.get(`${PATH}/${postResponse.body.id}`);
+      const response = await request.get(
+        `${PEOPLE_PATH}/${postResponse.body.id}`
+      );
 
-      expect(incomingToReal(response.body)).toEqual(people[0]);
+      expect(incomingToReal(response.body)).toEqual(PEOPLE[0]);
     });
 
     it('should return 404 if the person does not exist', async () => {
-      const response = await request.get(`${PATH}/1`);
+      const response = await request.get(`${PEOPLE_PATH}/1`);
 
       expect(response.status).toBe(404);
     });
 
     it('should return 400 if the id is not a number', async () => {
-      const response = await request.get(`${PATH}/abc`);
+      const response = await request.get(`${PEOPLE_PATH}/abc`);
 
       expect(response.status).toBe(400);
     });
 
     it('should return 400 if the id is not an integer', async () => {
-      const response = await request.get(`${PATH}/1.5`);
+      const response = await request.get(`${PEOPLE_PATH}/1.5`);
 
       expect(response.status).toBe(400);
     });
 
     it('should return 400 if the id is negative', async () => {
-      const response = await request.get(`${PATH}/-1`);
+      const response = await request.get(`${PEOPLE_PATH}/-1`);
 
       expect(response.status).toBe(400);
     });
 
     it('should return 400 if the id is zero', async () => {
-      const response = await request.get(`${PATH}/0`);
+      const response = await request.get(`${PEOPLE_PATH}/0`);
 
       expect(response.status).toBe(400);
     });
@@ -150,44 +154,46 @@ describe('people', () => {
 
   describe('POST /api/people', () => {
     it('should return 201', async () => {
-      const response = await request.post(PATH).send(people[0]);
+      const response = await request.post(PEOPLE_PATH).send(PEOPLE[0]);
       expect(response.status).toBe(201);
     });
 
     it('should actually create the person', async () => {
-      const postResponse = await request.post(PATH).send(people[0]);
+      const postResponse = await request.post(PEOPLE_PATH).send(PEOPLE[0]);
 
-      const getResponse = await request.get(`${PATH}/${postResponse.body.id}`);
-      expect(incomingToReal(getResponse.body)).toEqual(people[0]);
+      const getResponse = await request.get(
+        `${PEOPLE_PATH}/${postResponse.body.id}`
+      );
+      expect(incomingToReal(getResponse.body)).toEqual(PEOPLE[0]);
     });
 
     it('should return the created person', async () => {
-      const response = await request.post(PATH).send(people[0]);
+      const response = await request.post(PEOPLE_PATH).send(PEOPLE[0]);
 
-      expect(incomingToReal(response.body)).toEqual(people[0]);
+      expect(incomingToReal(response.body)).toEqual(PEOPLE[0]);
     });
 
     it('should return 400 if the name is missing', async () => {
-      const response = await request.post(PATH).send({});
+      const response = await request.post(PEOPLE_PATH).send({});
       expect(response.status).toBe(400);
     });
 
     it('should return 400 if the name is more than 100 characters long', async () => {
-      const response = await request.post(PATH).send({
+      const response = await request.post(PEOPLE_PATH).send({
         name: 'a'.repeat(101),
       });
       expect(response.status).toBe(400);
     });
 
     it('should return 400 if the name is less than 3 characters long', async () => {
-      const response = await request.post(PATH).send({
+      const response = await request.post(PEOPLE_PATH).send({
         name: 'aa',
       });
       expect(response.status).toBe(400);
     });
 
     it('should trim the name', async () => {
-      const postResponse = await request.post(PATH).send({
+      const postResponse = await request.post(PEOPLE_PATH).send({
         name: '   abc   ',
       });
 
@@ -195,7 +201,7 @@ describe('people', () => {
     });
 
     it('should return 400 if the email is not an email', async () => {
-      const response = await request.post(PATH).send({
+      const response = await request.post(PEOPLE_PATH).send({
         name: 'a'.repeat(3),
         email: 'not an email',
       });
@@ -203,7 +209,7 @@ describe('people', () => {
     });
 
     it('should return 400 if the email is more than 100 characters long', async () => {
-      const response = await request.post(PATH).send({
+      const response = await request.post(PEOPLE_PATH).send({
         name: 'a'.repeat(3),
         email: `${'a'.repeat(50)}.${'a'.repeat(50)}@gmail.com`,
       });
@@ -211,7 +217,7 @@ describe('people', () => {
     });
 
     it('should trim the email', async () => {
-      const postResponse = await request.post(PATH).send({
+      const postResponse = await request.post(PEOPLE_PATH).send({
         name: 'a'.repeat(3),
         email: '    a.b@gmail.com   ',
       });
@@ -220,7 +226,7 @@ describe('people', () => {
     });
 
     it('should trim the phoneNumber', async () => {
-      const postResponse = await request.post(PATH).send({
+      const postResponse = await request.post(PEOPLE_PATH).send({
         name: 'a'.repeat(3),
         phoneNumber: '   123456789   ',
       });
@@ -229,7 +235,7 @@ describe('people', () => {
     });
 
     it('should return 400 if the phoneNumber is more than 30 characters long', async () => {
-      const response = await request.post(PATH).send({
+      const response = await request.post(PEOPLE_PATH).send({
         name: 'a'.repeat(3),
         phoneNumber: 'a'.repeat(31),
       });
@@ -237,7 +243,7 @@ describe('people', () => {
     });
 
     it('should trim the bio', async () => {
-      const postResponse = await request.post(PATH).send({
+      const postResponse = await request.post(PEOPLE_PATH).send({
         name: 'a'.repeat(3),
         bio: '   abc   ',
       });
@@ -246,7 +252,7 @@ describe('people', () => {
     });
 
     it('should return 400 if the bio is more than 500 characters long', async () => {
-      const response = await request.post(PATH).send({
+      const response = await request.post(PEOPLE_PATH).send({
         name: 'a'.repeat(3),
         bio: 'a'.repeat(501),
       });
@@ -254,7 +260,7 @@ describe('people', () => {
     });
 
     it('should trim studiesOrJob', async () => {
-      const postResponse = await request.post(PATH).send({
+      const postResponse = await request.post(PEOPLE_PATH).send({
         name: 'a'.repeat(3),
         studiesOrJob: '   abc   ',
       });
@@ -263,7 +269,7 @@ describe('people', () => {
     });
 
     it('should return 400 if studiesOrJob is more than 100 characters long', async () => {
-      const response = await request.post(PATH).send({
+      const response = await request.post(PEOPLE_PATH).send({
         name: 'a'.repeat(3),
         studiesOrJob: 'a'.repeat(101),
       });
@@ -271,7 +277,7 @@ describe('people', () => {
     });
 
     it('should return 400 if the birthdate is not a date', async () => {
-      const response = await request.post(PATH).send({
+      const response = await request.post(PEOPLE_PATH).send({
         name: 'a'.repeat(3),
         birthdate: 'not a date',
       });
@@ -279,7 +285,7 @@ describe('people', () => {
     });
 
     it('should return 400 if the birthdate is in the future', async () => {
-      const response = await request.post(PATH).send({
+      const response = await request.post(PEOPLE_PATH).send({
         name: 'a'.repeat(3),
         birthdate: '2100-01-01',
       });
@@ -287,7 +293,7 @@ describe('people', () => {
     });
 
     it('should return 400 if the birthdate is before 1900', async () => {
-      const response = await request.post(PATH).send({
+      const response = await request.post(PEOPLE_PATH).send({
         name: 'a'.repeat(3),
         birthdate: '1899-12-31',
       });
@@ -295,66 +301,66 @@ describe('people', () => {
     });
   });
 
-  describe(`PUT ${PATH}/:id`, () => {
+  describe(`PUT ${PEOPLE_PATH}/:id`, () => {
     it('should return 200', async () => {
-      const postResponse = await request.post(PATH).send(people[0]);
+      const postResponse = await request.post(PEOPLE_PATH).send(PEOPLE[0]);
 
       const response = await request
-        .put(`${PATH}/${postResponse.body.id}`)
+        .put(`${PEOPLE_PATH}/${postResponse.body.id}`)
         .send({ name: 'new name' });
       expect(response.status).toBe(200);
     });
 
     it('should actually update the person', async () => {
-      const postResponse = await request.post(PATH).send(people[0]);
+      const postResponse = await request.post(PEOPLE_PATH).send(PEOPLE[0]);
 
       const putResponse = await request
-        .put(`${PATH}/${postResponse.body.id}`)
-        .send(people[1]);
+        .put(`${PEOPLE_PATH}/${postResponse.body.id}`)
+        .send(PEOPLE[1]);
 
-      expect(incomingToReal(putResponse.body)).toEqual(people[1]);
+      expect(incomingToReal(putResponse.body)).toEqual(PEOPLE[1]);
     });
 
     it('should return the updated person', async () => {
-      const postResponse = await request.post(PATH).send(people[0]);
+      const postResponse = await request.post(PEOPLE_PATH).send(PEOPLE[0]);
 
       const putResponse = await request
-        .put(`${PATH}/${postResponse.body.id}`)
-        .send(people[1]);
+        .put(`${PEOPLE_PATH}/${postResponse.body.id}`)
+        .send(PEOPLE[1]);
 
-      expect(incomingToReal(putResponse.body)).toEqual(people[1]);
+      expect(incomingToReal(putResponse.body)).toEqual(PEOPLE[1]);
     });
 
     it('should return 404 if the person does not exist', async () => {
       const response = await request
-        .put(`${PATH}/1`)
+        .put(`${PEOPLE_PATH}/1`)
         .send({ name: 'new name' });
       expect(response.status).toBe(404);
     });
 
     it('should return 400 if the name is less than 3 characters long', async () => {
-      const postResponse = await request.post(PATH).send(people[0]);
+      const postResponse = await request.post(PEOPLE_PATH).send(PEOPLE[0]);
 
       const response = await request
-        .put(`${PATH}/${postResponse.body.id}`)
+        .put(`${PEOPLE_PATH}/${postResponse.body.id}`)
         .send({ name: 'aa' });
       expect(response.status).toBe(400);
     });
 
     it('should return 400 if the name is more than 100 characters long', async () => {
-      const postResponse = await request.post(PATH).send(people[0]);
+      const postResponse = await request.post(PEOPLE_PATH).send(PEOPLE[0]);
 
       const response = await request
-        .put(`${PATH}/${postResponse.body.id}`)
+        .put(`${PEOPLE_PATH}/${postResponse.body.id}`)
         .send({ name: 'a'.repeat(101) });
       expect(response.status).toBe(400);
     });
 
     it('should trim the name', async () => {
-      const postResponse = await request.post(PATH).send(people[0]);
+      const postResponse = await request.post(PEOPLE_PATH).send(PEOPLE[0]);
 
       const response = await request
-        .put(`${PATH}/${postResponse.body.id}`)
+        .put(`${PEOPLE_PATH}/${postResponse.body.id}`)
         .send({
           name: '   abc   ',
         });
@@ -363,28 +369,28 @@ describe('people', () => {
     });
 
     it('should return 400 if the email is not an email', async () => {
-      const postResponse = await request.post(PATH).send(people[0]);
+      const postResponse = await request.post(PEOPLE_PATH).send(PEOPLE[0]);
 
       const response = await request
-        .put(`${PATH}/${postResponse.body.id}`)
+        .put(`${PEOPLE_PATH}/${postResponse.body.id}`)
         .send({ email: 'not an email' });
       expect(response.status).toBe(400);
     });
 
     it('should return 400 if the email is more than 100 characters long', async () => {
-      const postResponse = await request.post(PATH).send(people[0]);
+      const postResponse = await request.post(PEOPLE_PATH).send(PEOPLE[0]);
 
       const response = await request
-        .put(`${PATH}/${postResponse.body.id}`)
+        .put(`${PEOPLE_PATH}/${postResponse.body.id}`)
         .send({ email: `${'a'.repeat(50)}.${'a'.repeat(50)}@gmail.com` });
       expect(response.status).toBe(400);
     });
 
     it('should trim the email', async () => {
-      const postResponse = await request.post(PATH).send(people[0]);
+      const postResponse = await request.post(PEOPLE_PATH).send(PEOPLE[0]);
 
       const response = await request
-        .put(`${PATH}/${postResponse.body.id}`)
+        .put(`${PEOPLE_PATH}/${postResponse.body.id}`)
         .send({
           email: '     a.b@gmail.com     ',
         });
@@ -393,19 +399,19 @@ describe('people', () => {
     });
 
     it('should return 400 if the phoneNumber is more than 30 characters long', async () => {
-      const postResponse = await request.post(PATH).send(people[0]);
+      const postResponse = await request.post(PEOPLE_PATH).send(PEOPLE[0]);
 
       const response = await request
-        .put(`${PATH}/${postResponse.body.id}`)
+        .put(`${PEOPLE_PATH}/${postResponse.body.id}`)
         .send({ phoneNumber: 'a'.repeat(31) });
       expect(response.status).toBe(400);
     });
 
     it('should trim the phoneNumber', async () => {
-      const postResponse = await request.post(PATH).send(people[0]);
+      const postResponse = await request.post(PEOPLE_PATH).send(PEOPLE[0]);
 
       const response = await request
-        .put(`${PATH}/${postResponse.body.id}`)
+        .put(`${PEOPLE_PATH}/${postResponse.body.id}`)
         .send({
           phoneNumber: '   123456789   ',
         });
@@ -414,19 +420,19 @@ describe('people', () => {
     });
 
     it('should return 400 if the bio is more than 500 characters long', async () => {
-      const postResponse = await request.post(PATH).send(people[0]);
+      const postResponse = await request.post(PEOPLE_PATH).send(PEOPLE[0]);
 
       const response = await request
-        .put(`${PATH}/${postResponse.body.id}`)
+        .put(`${PEOPLE_PATH}/${postResponse.body.id}`)
         .send({ bio: 'a'.repeat(501) });
       expect(response.status).toBe(400);
     });
 
     it('should trim the bio', async () => {
-      const postResponse = await request.post(PATH).send(people[0]);
+      const postResponse = await request.post(PEOPLE_PATH).send(PEOPLE[0]);
 
       const response = await request
-        .put(`${PATH}/${postResponse.body.id}`)
+        .put(`${PEOPLE_PATH}/${postResponse.body.id}`)
         .send({
           bio: '   abc   ',
         });
@@ -435,19 +441,19 @@ describe('people', () => {
     });
 
     it('should return 400 if the studiesOrJob is more than 100 characters long', async () => {
-      const postResponse = await request.post(PATH).send(people[0]);
+      const postResponse = await request.post(PEOPLE_PATH).send(PEOPLE[0]);
 
       const response = await request
-        .put(`${PATH}/${postResponse.body.id}`)
+        .put(`${PEOPLE_PATH}/${postResponse.body.id}`)
         .send({ studiesOrJob: 'a'.repeat(101) });
       expect(response.status).toBe(400);
     });
 
     it('should trim the studiesOrJob', async () => {
-      const postResponse = await request.post(PATH).send(people[0]);
+      const postResponse = await request.post(PEOPLE_PATH).send(PEOPLE[0]);
 
       const response = await request
-        .put(`${PATH}/${postResponse.body.id}`)
+        .put(`${PEOPLE_PATH}/${postResponse.body.id}`)
         .send({
           studiesOrJob: '   abc   ',
         });
@@ -456,100 +462,104 @@ describe('people', () => {
     });
 
     it('should return 400 if the birthdate is not a date', async () => {
-      const postResponse = await request.post(PATH).send(people[0]);
+      const postResponse = await request.post(PEOPLE_PATH).send(PEOPLE[0]);
 
       const response = await request
-        .put(`${PATH}/${postResponse.body.id}`)
+        .put(`${PEOPLE_PATH}/${postResponse.body.id}`)
         .send({ birthdate: 'not a date' });
       expect(response.status).toBe(400);
     });
 
     it('should return 400 if the birthdate is in the future', async () => {
-      const postResponse = await request.post(PATH).send(people[0]);
+      const postResponse = await request.post(PEOPLE_PATH).send(PEOPLE[0]);
 
       const response = await request
-        .put(`${PATH}/${postResponse.body.id}`)
+        .put(`${PEOPLE_PATH}/${postResponse.body.id}`)
         .send({ birthdate: '2100-01-01' });
       expect(response.status).toBe(400);
     });
 
     it('should return 400 if the birthdate is before 1900-01-01', async () => {
-      const postResponse = await request.post(PATH).send(people[0]);
+      const postResponse = await request.post(PEOPLE_PATH).send(PEOPLE[0]);
 
       const response = await request
-        .put(`${PATH}/${postResponse.body.id}`)
+        .put(`${PEOPLE_PATH}/${postResponse.body.id}`)
         .send({ birthdate: '1899-12-31' });
       expect(response.status).toBe(400);
     });
 
     it('should return 400 if the id is not a number', async () => {
-      const response = await request.put(`${PATH}/abc`).send(people[0]);
+      const response = await request.put(`${PEOPLE_PATH}/abc`).send(PEOPLE[0]);
       expect(response.status).toBe(400);
     });
 
     it('should return 400 if the id is not an integer', async () => {
-      const response = await request.put(`${PATH}/1.5`).send(people[0]);
+      const response = await request.put(`${PEOPLE_PATH}/1.5`).send(PEOPLE[0]);
       expect(response.status).toBe(400);
     });
 
     it('should return 400 if the id is less than 1', async () => {
-      const response = await request.put(`${PATH}/0`).send(people[0]);
+      const response = await request.put(`${PEOPLE_PATH}/0`).send(PEOPLE[0]);
       expect(response.status).toBe(400);
     });
   });
 
-  describe(`DELETE ${PATH}/:id`, () => {
+  describe(`DELETE ${PEOPLE_PATH}/:id`, () => {
     it('should return 204 if the person was deleted', async () => {
-      const postResponse = await request.post(PATH).send(people[0]);
+      const postResponse = await request.post(PEOPLE_PATH).send(PEOPLE[0]);
 
-      const response = await request.delete(`${PATH}/${postResponse.body.id}`);
+      const response = await request.delete(
+        `${PEOPLE_PATH}/${postResponse.body.id}`
+      );
       expect(response.status).toBe(204);
     });
 
     it('should return 404 if the person was not found', async () => {
-      const response = await request.delete(`${PATH}/123`);
+      const response = await request.delete(`${PEOPLE_PATH}/123`);
       expect(response.status).toBe(404);
     });
 
     it('should actually delete the person', async () => {
-      const postResponse = await request.post(PATH).send(people[0]);
+      const postResponse = await request.post(PEOPLE_PATH).send(PEOPLE[0]);
 
-      await request.delete(`${PATH}/${postResponse.body.id}`);
+      await request.delete(`${PEOPLE_PATH}/${postResponse.body.id}`);
 
-      const response = await request.get(`${PATH}/${postResponse.body.id}`);
+      const response = await request.get(
+        `${PEOPLE_PATH}/${postResponse.body.id}`
+      );
       expect(response.status).toBe(404);
     });
 
     it('should return 400 if the id is not a number', async () => {
-      const response = await request.delete(`${PATH}/not-a-number`);
+      const response = await request.delete(`${PEOPLE_PATH}/not-a-number`);
       expect(response.status).toBe(400);
     });
 
     it('should return 400 if the id is not an integer', async () => {
-      const response = await request.delete(`${PATH}/1.5`);
+      const response = await request.delete(`${PEOPLE_PATH}/1.5`);
       expect(response.status).toBe(400);
     });
 
     it('should return 400 if the id is less than 1', async () => {
-      const response = await request.delete(`${PATH}/0`);
+      const response = await request.delete(`${PEOPLE_PATH}/0`);
       expect(response.status).toBe(400);
     });
   });
 
-  describe(`DELETE ${PATH}`, () => {
+  describe(`DELETE ${PEOPLE_PATH}`, () => {
     it('should return 204 if the people were deleted', async () => {
-      await request.post(PATH).send(people[0]);
+      await request.post(PEOPLE_PATH).send(PEOPLE[0]);
 
-      const response = await request.delete(PATH);
+      const response = await request.delete(PEOPLE_PATH);
       expect(response.status).toBe(204);
     });
 
     it('should actually delete the people', async () => {
-      await request.post(PATH).send(people[0]);
+      await request.post(PEOPLE_PATH).send(PEOPLE[0]);
 
-      await request.delete(PATH);
+      await request.delete(PEOPLE_PATH);
 
-      const response = await request.get(PATH);
+      const response = await request.get(PEOPLE_PATH);
       expect(response.body).toEqual([]);
     });
   });
