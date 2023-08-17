@@ -3,9 +3,9 @@ import KoaRouter from '@koa/router';
 
 import { PrismaClient } from '@prisma/client';
 import bodyParser from 'koa-bodyparser';
-import Seeder from '../seeders/seeder.js';
-import Service from '../service/service.js';
-import Router from '../router/router.js';
+import Seeder from '../seeders/Seeder.js';
+import Service from '../service/Service.js';
+import Router from '../router/Router.js';
 import CorsManager from './CorsManager.js';
 import CustomLogger from './CustomLogger.js';
 import CustomPrismaClient from './CustomPrismaClient.js';
@@ -93,13 +93,6 @@ class Server {
     this.app.use(this.errorHandler.koaMiddleware);
 
     this.app.use(Auth.checkJsonWebToken());
-
-    // this.app.use(async (ctx, next) => {
-    //   this.serverLogger.debug(ctx.headers.authorization ?? 'werkt niet'); // 👈 1
-    //   this.serverLogger.debug(JSON.stringify(ctx.state.user)); // 👈 2
-    //   this.serverLogger.debug(ctx.state.jwtOriginalError); // 👈 3
-    //   await next();
-    // });
 
     // setup body parser
     this.app.use(bodyParser());

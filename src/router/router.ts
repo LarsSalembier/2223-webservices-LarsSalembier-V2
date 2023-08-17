@@ -1,8 +1,8 @@
 import KoaRouter from '@koa/router';
-import Service from '../service/service.js';
-import PersonRouter from './person.js';
-import AdministratorRouter from './administrator.js';
-import GroupRouter from './group.js';
+import Service from '../service/Service.js';
+import PersonRouter from './PersonRouter.js';
+import AdministratorRouter from './AdministratorRouter.js';
+import GroupRouter from './GroupRouter.js';
 
 class Router {
   private readonly router: KoaRouter;

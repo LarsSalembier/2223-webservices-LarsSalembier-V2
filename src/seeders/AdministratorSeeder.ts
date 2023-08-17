@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { Administrator } from '@prisma/client';
-import AdministratorService from '../service/administrator.js';
+import AdministratorService from '../service/AdministratorService.js';
 
 class AdministratorSeeder {
   private readonly service: AdministratorService;

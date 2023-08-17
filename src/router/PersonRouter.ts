@@ -1,9 +1,9 @@
 import Router from '@koa/router';
 import { Membership, Person } from '@prisma/client';
 import { Context } from 'koa';
-import PersonService from '../service/person.js';
-import Validator from '../validation/validation.js';
-import schemas from '../validation/person.js';
+import PersonService from '../service/PersonService.js';
+import Validator from '../validation/Validator.js';
+import schemas from '../validation/personSchema.js';
 
 const PATH = '/api/people';
 

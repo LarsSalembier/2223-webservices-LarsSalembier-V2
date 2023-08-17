@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { ValidationSchemas } from './validation.js';
+import { ValidationSchemas } from './Validator.js';
 
 const schemas: ValidationSchemas = {
   getAll: {},

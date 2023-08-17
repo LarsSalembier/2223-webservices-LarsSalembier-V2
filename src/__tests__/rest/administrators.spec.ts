@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { Administrator } from '@prisma/client';
 import supertest from 'supertest';
 import Server from '../../core/Server.js';
-import AdministratorSeeder from '../../seeders/administrator.js';
+import AdministratorSeeder from '../../seeders/AdministratorSeeder.js';
 
 export const AMOUNT_OF_ADMINISTRATORS = 5;
 

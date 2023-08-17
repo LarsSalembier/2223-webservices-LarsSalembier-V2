@@ -1,6 +1,6 @@
-import PersonService from './person.js';
-import AdministratorService from './administrator.js';
-import GroupService from './group.js';
+import PersonService from './PersonService.js';
+import AdministratorService from './AdministratorService.js';
+import GroupService from './GroupService.js';
 import Repository from '../repository/Repository.js';
 
 class Service {

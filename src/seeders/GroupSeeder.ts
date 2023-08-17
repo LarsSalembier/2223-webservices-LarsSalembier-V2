@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { Group } from '@prisma/client';
-import GroupService from '../service/group.js';
+import GroupService from '../service/GroupService.js';
 
 class GroupSeeder {
   private readonly service: GroupService;

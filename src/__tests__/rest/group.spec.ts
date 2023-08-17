@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { Group } from '@prisma/client';
 import supertest from 'supertest';
 import Server from '../../core/Server.js';
-import GroupSeeder from '../../seeders/group.js';
+import GroupSeeder from '../../seeders/GroupSeeder.js';
 import { PEOPLE, PEOPLE_PATH } from './people.spec.js';
 
 const AMOUNT_OF_GROUPS = 5;

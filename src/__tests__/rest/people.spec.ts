@@ -3,7 +3,7 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import supertest from 'supertest';
 import { Person } from '@prisma/client';
 import Server from '../../core/Server.js';
-import PersonSeeder from '../../seeders/person.js';
+import PersonSeeder from '../../seeders/PersonSeeder.js';
 
 type IncomingPersonData = {
   name: string;

@@ -1,9 +1,9 @@
 import Router from '@koa/router';
 import { Administrator } from '@prisma/client';
 import { Context } from 'koa';
-import Validator from '../validation/validation.js';
-import schemas from '../validation/administrator.js';
-import AdministratorService from '../service/administrator.js';
+import Validator from '../validation/Validator.js';
+import schemas from '../validation/administratorSchema.js';
+import AdministratorService from '../service/AdministratorService.js';
 
 const PATH = '/api/administrators';
 

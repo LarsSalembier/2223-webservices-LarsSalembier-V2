@@ -1,5 +1,5 @@
 import { Membership } from '@prisma/client';
-import PersonService from '../service/person.js';
+import PersonService from '../service/PersonService.js';
 
 function shuffle<T>(array: T[]): T[] {
   const shuffled = array.reduce(

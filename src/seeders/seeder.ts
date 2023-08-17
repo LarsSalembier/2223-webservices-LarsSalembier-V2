@@ -1,9 +1,9 @@
 import CustomLogger from '../core/CustomLogger.js';
-import Service from '../service/service.js';
-import AdministratorSeeder from './administrator.js';
-import GroupSeeder from './group.js';
-import MembershipSeeder from './membership.js';
-import PersonSeeder from './person.js';
+import Service from '../service/Service.js';
+import AdministratorSeeder from './AdministratorSeeder.js';
+import GroupSeeder from './GroupSeeder.js';
+import MembershipSeeder from './MembershipSeeder.js';
+import PersonSeeder from './PersonSeeder.js';
 
 class Seeder {
   private readonly service: Service;

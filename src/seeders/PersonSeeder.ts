@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { Person } from '@prisma/client';
-import PersonService from '../service/person.js';
+import PersonService from '../service/PersonService.js';
 
 class PersonSeeder {
   private readonly service: PersonService;

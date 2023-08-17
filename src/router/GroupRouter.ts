@@ -1,9 +1,9 @@
 import Router from '@koa/router';
 import { Group, Membership } from '@prisma/client';
 import { Context } from 'koa';
-import Validator from '../validation/validation.js';
-import schemas from '../validation/group.js';
-import GroupService from '../service/group.js';
+import Validator from '../validation/Validator.js';
+import schemas from '../validation/groupSchema.js';
+import GroupService from '../service/GroupService.js';
 
 const PATH = '/api/groups';
 

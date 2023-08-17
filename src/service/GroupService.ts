@@ -1,11 +1,11 @@
 import { Group, Person } from '@prisma/client';
 import ServiceError from '../core/ServiceError.js';
-import GroupRepository from '../repository/group.js';
+import GroupRepository from '../repository/GroupRepository.js';
 import RepositoryError, {
   RepositoryErrorType,
 } from '../repository/RepositoryError.js';
-import MembershipRepository from '../repository/membership.js';
-import PersonRepository from '../repository/person.js';
+import MembershipRepository from '../repository/MembershipRepository.js';
+import PersonRepository from '../repository/PersonRepository.js';
 
 class GroupService {
   private readonly groupRepository;

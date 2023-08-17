@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client';
-import AdministratorRepository from './administrator.js';
-import GroupRepository from './group.js';
-import PersonRepository from './person.js';
-import MembershipRepository from './membership.js';
+import AdministratorRepository from './AdministratorRepository.js';
+import GroupRepository from './GroupRepository.js';
+import PersonRepository from './PersonRepository.js';
+import MembershipRepository from './MembershipRepository.js';
 
 class Repository {
   public readonly personRepository: PersonRepository;
