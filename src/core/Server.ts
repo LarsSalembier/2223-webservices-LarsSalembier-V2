@@ -109,7 +109,9 @@ class Server {
     this.app.listen(this.port);
 
     // log server startup
-    this.serverLogger.info(`🚀 Server listening on http://localhost:9000`);
+    this.serverLogger.info(
+      `🚀 Server listening on http://localhost:${this.port}`
+    );
   }
 
   public async start() {

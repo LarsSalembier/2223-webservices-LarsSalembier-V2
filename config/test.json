@@ -13,5 +13,7 @@
 
   "database": {
     "seed": false
-  }
+  },
+
+  "port": 9000
 }

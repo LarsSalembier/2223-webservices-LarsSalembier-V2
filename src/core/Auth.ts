@@ -4,7 +4,7 @@ import jwt from 'koa-jwt';
 import { Context, Next } from 'koa';
 import axios from 'axios';
 import CustomLogger from './CustomLogger.js';
-import { ServiceErrorType } from './ServiceError.js';
+import { ServiceErrorType } from '../service/ServiceError.js';
 
 const AUTH_USER_INFO: string = config.get('auth.userInfo');
 

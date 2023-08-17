@@ -1,6 +1,6 @@
 import Joi from 'joi';
 import { Context, Next } from 'koa';
-import ServiceError, { ServiceErrorType } from '../core/ServiceError.js';
+import ServiceError, { ServiceErrorType } from '../service/ServiceError.js';
 
 interface ErrorDetail {
   type: string;

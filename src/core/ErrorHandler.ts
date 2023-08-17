@@ -1,7 +1,7 @@
 import { Context, Next } from 'koa';
 import config from 'config';
 import CustomLogger from './CustomLogger.js';
-import ServiceError, { ServiceErrorType } from './ServiceError.js';
+import ServiceError, { ServiceErrorType } from '../service/ServiceError.js';
 
 const NODE_ENV = config.get('env');
 

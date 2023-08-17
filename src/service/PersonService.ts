@@ -1,5 +1,5 @@
 import { Group, Person } from '@prisma/client';
-import ServiceError from '../core/ServiceError.js';
+import ServiceError from './ServiceError.js';
 import PersonRepository from '../repository/PersonRepository.js';
 import RepositoryError, {
   RepositoryErrorType,

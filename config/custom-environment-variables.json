@@ -1,5 +1,6 @@
 {
   "env": "NODE_ENV",
+  "port": "PORT",
   "databaseUrl": "DATABASE_URL",
   "auth": {
     "jwksUri": "AUTH_JWKS_URI",

@@ -1,5 +1,5 @@
 import { Administrator } from '@prisma/client';
-import ServiceError from '../core/ServiceError.js';
+import ServiceError from './ServiceError.js';
 import AdministratorRepository from '../repository/AdministratorRepository.js';
 import RepositoryError, {
   RepositoryErrorType,
