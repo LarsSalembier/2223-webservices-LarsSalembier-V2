@@ -4,8 +4,6 @@ import { Context } from 'koa';
 import Validator from '../validation/validation.js';
 import schemas from '../validation/group.js';
 import GroupService from '../service/group.js';
-import MembershipService from '../service/membership.js';
-import PersonService from '../service/person.js';
 
 const PATH = '/api/groups';
 
@@ -14,20 +12,9 @@ class GroupRouter {
 
   private readonly groupService: GroupService;
 
-  private readonly personService: PersonService;
-
-  private readonly membershipService: MembershipService;
-
-  constructor(
-    router: Router,
-    groupService: GroupService,
-    personService: PersonService,
-    membershipService: MembershipService
-  ) {
+  constructor(router: Router, groupService: GroupService) {
     this.router = router;
     this.groupService = groupService;
-    this.personService = personService;
-    this.membershipService = membershipService;
 
     this.getAll = this.getAll.bind(this);
     this.getById = this.getById.bind(this);
@@ -94,15 +81,7 @@ class GroupRouter {
   }
 
   async getMembers(ctx: Context) {
-    await this.groupService.getById(ctx.params.id);
-    const memberships = await this.membershipService.getByGroupId(
-      ctx.params.id
-    );
-    ctx.body = await Promise.all(
-      memberships.map(async (membership) => {
-        return this.personService.getById(membership.personId);
-      })
-    );
+    ctx.body = await this.groupService.getMembers(ctx.params.id);
   }
 
   async create(ctx: Context) {
@@ -115,10 +94,8 @@ class GroupRouter {
   async addMember(ctx: Context) {
     const { id } = ctx.params;
     const { personId } = ctx.request.body as Omit<Membership, 'groupId'>;
-    await this.membershipService.create({
-      groupId: id,
-      personId,
-    });
+
+    await this.groupService.addMember(id, personId);
     ctx.body = `Person ${personId} added to group ${id}`;
     ctx.status = 201;
   }
@@ -132,26 +109,22 @@ class GroupRouter {
   }
 
   async delete(ctx: Context) {
-    await this.membershipService.deleteByGroupId(ctx.params.id);
-
     await this.groupService.delete(ctx.params.id);
     ctx.status = 204;
   }
 
   async deleteAll(ctx: Context) {
-    await this.membershipService.deleteAll();
-
     await this.groupService.deleteAll();
     ctx.status = 204;
   }
 
   async removeMember(ctx: Context) {
-    await this.membershipService.delete(ctx.params.memberId, ctx.params.id);
+    await this.groupService.removeMember(ctx.params.id, ctx.params.memberId);
     ctx.status = 204;
   }
 
   async removeAllMembers(ctx: Context) {
-    await this.membershipService.deleteByGroupId(ctx.params.id);
+    await this.groupService.removeAllMembers(ctx.params.id);
     ctx.status = 204;
   }
 }

@@ -21,17 +21,17 @@
   - [x] voldoende complex (meer dan één tabel)
   - [x] één module beheert de connectie + connectie wordt gesloten bij sluiten server
   - [x] heeft migraties
-  - [x] heeft seeds <br />
+  - [x] heeft seeds
 
 - **repositorylaag**
 
   - [x] definieert één repository per entiteit (niet voor tussentabellen) - indien van toepassing
-  - [x] mapt OO-rijke data naar relationele tabellen en vice versa <br />
+  - [x] mapt OO-rijke data naar relationele tabellen en vice versa
 
 - **servicelaag met een zekere complexiteit**
 
   - [x] bevat alle domeinlogica
-  - [x] bevat geen SQL-queries of databank-gerelateerde code <br />
+  - [x] bevat geen SQL-queries of databank-gerelateerde code
 
 - **REST-laag**
 
@@ -39,7 +39,7 @@
   - [x] degelijke foutboodschappen
   - [x] volgt de conventies van een RESTful API
   - [x] bevat geen domeinlogica
-  - [ ] degelijke authorisatie/authenticatie op alle routes <br />
+  - [ ] degelijke authorisatie/authenticatie op alle routes
 
 - **varia**
   - [x] een aantal niet-triviale testen (min. 1 controller >=80% coverage)

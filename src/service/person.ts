@@ -1,53 +1,98 @@
-import { Person, Prisma, PrismaClient } from '@prisma/client';
+import { Group, Person } from '@prisma/client';
 import ServiceError from '../core/ServiceError.js';
+import PersonRepository from '../repository/person.js';
+import RepositoryError, {
+  RepositoryErrorType,
+} from '../repository/RepositoryError.js';
+import MembershipRepository from '../repository/membership.js';
+import GroupRepository from '../repository/group.js';
 
 class PersonService {
-  private readonly prisma;
+  private readonly personRepository;
 
-  constructor(prismaClient: PrismaClient) {
-    this.prisma = prismaClient;
+  private readonly membershipRepository;
+
+  private readonly groupRepository;
+
+  constructor(
+    personRepository: PersonRepository,
+    membershipRepository: MembershipRepository,
+    groupRepository: GroupRepository
+  ) {
+    this.personRepository = personRepository;
+    this.membershipRepository = membershipRepository;
+    this.groupRepository = groupRepository;
   }
 
   async getAll(): Promise<Person[]> {
-    return this.prisma.person.findMany();
+    return this.personRepository.getAll();
   }
 
   async getById(id: number): Promise<Person> {
-    const data = await this.prisma.person.findUnique({
-      where: {
-        id,
-      },
-    });
-
-    if (!data) {
-      throw ServiceError.notFound(`There is no person with id ${id}`);
+    try {
+      return await this.personRepository.getById(id);
+    } catch (e) {
+      if (e instanceof RepositoryError) {
+        if (e.type === RepositoryErrorType.NOT_FOUND) {
+          throw ServiceError.notFound(e.message);
+        }
+      }
+      throw e;
     }
+  }
 
-    return data;
+  async getGroups(id: number): Promise<Group[]> {
+    // check if person exists
+    await this.getById(id);
+
+    const memberships = await this.membershipRepository.getByPersonId(id);
+
+    const groupIds = memberships.map((membership) => membership.groupId);
+
+    return Promise.all(
+      groupIds.map(async (groupId) => {
+        return this.groupRepository.getById(groupId);
+      })
+    );
   }
 
   async create(data: Omit<Person, 'id'>): Promise<Person> {
-    return this.prisma.person.create({
-      data,
-    });
+    return this.personRepository.create(data);
   }
 
   async createMany(data: Omit<Person, 'id'>[]): Promise<Person[]> {
-    return Promise.all(data.map((entity) => this.create(entity)));
+    return this.personRepository.createMany(data);
+  }
+
+  async joinGroup(id: number, groupId: number): Promise<void> {
+    // check if person exists
+    await this.getById(id);
+
+    // check if the group exists
+    try {
+      await this.groupRepository.getById(groupId);
+    } catch (e) {
+      if (e instanceof RepositoryError) {
+        if (e.type === RepositoryErrorType.NOT_FOUND) {
+          throw ServiceError.notFound(e.message);
+        }
+      }
+      throw e;
+    }
+
+    await this.membershipRepository.create({
+      personId: id,
+      groupId,
+    });
   }
 
   async update(id: number, data: Partial<Omit<Person, 'id'>>): Promise<Person> {
     try {
-      return await this.prisma.person.update({
-        where: {
-          id,
-        },
-        data,
-      });
+      return await this.personRepository.update(id, data);
     } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError) {
-        if (e.code === 'P2025') {
-          throw ServiceError.notFound(`There is no person with id ${id}`);
+      if (e instanceof RepositoryError) {
+        if (e.type === RepositoryErrorType.NOT_FOUND) {
+          throw ServiceError.notFound(e.message);
         }
       }
       throw e;
@@ -55,37 +100,72 @@ class PersonService {
   }
 
   async delete(id: number): Promise<Person> {
+    // delete all memberships
+    await this.membershipRepository.deleteByPersonId(id);
+
     try {
-      return await this.prisma.person.delete({
-        where: {
-          id,
-        },
-      });
+      return await this.personRepository.delete(id);
     } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError)
-        if (e.code === 'P2025') {
-          throw ServiceError.notFound(`There is no person with id ${id}`);
+      if (e instanceof RepositoryError) {
+        if (e.type === RepositoryErrorType.NOT_FOUND) {
+          throw ServiceError.notFound(e.message);
         }
+      }
       throw e;
     }
   }
 
   async deleteMany(ids: number[]): Promise<number> {
-    const batchPayload = await this.prisma.person.deleteMany({
-      where: {
-        id: {
-          in: ids,
-        },
-      },
-    });
+    // delete all memberships
+    await Promise.all(
+      ids.map(async (id) => {
+        await this.membershipRepository.deleteByPersonId(id);
+      })
+    );
 
-    return batchPayload.count;
+    return this.personRepository.deleteMany(ids);
   }
 
   async deleteAll(): Promise<number> {
-    const batchPayload = await this.prisma.person.deleteMany({});
+    // delete all memberships
+    await this.membershipRepository.deleteAll();
 
-    return batchPayload.count;
+    return this.personRepository.deleteAll();
+  }
+
+  async leaveGroup(id: number, groupId: number): Promise<void> {
+    // check if person exists
+    await this.getById(id);
+
+    // check if the group exists
+    try {
+      await this.groupRepository.getById(groupId);
+    } catch (e) {
+      if (e instanceof RepositoryError) {
+        if (e.type === RepositoryErrorType.NOT_FOUND) {
+          throw ServiceError.notFound(e.message);
+        }
+      }
+      throw e;
+    }
+
+    try {
+      await this.membershipRepository.delete(id, groupId);
+    } catch (e) {
+      if (e instanceof RepositoryError) {
+        if (e.type === RepositoryErrorType.NOT_FOUND) {
+          throw ServiceError.notFound(e.message);
+        }
+      }
+      throw e;
+    }
+  }
+
+  async leaveAllGroups(id: number): Promise<void> {
+    // check if person exists
+    await this.getById(id);
+
+    await this.membershipRepository.deleteByPersonId(id);
   }
 }
 

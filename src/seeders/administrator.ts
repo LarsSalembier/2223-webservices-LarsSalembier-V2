@@ -22,7 +22,6 @@ class AdministratorSeeder {
   }
 
   async run(): Promise<Administrator[]> {
-    await this.service.deleteAll();
     const promises = Array.from({ length: 10 }).map(() => this.add());
     return Promise.all(promises);
   }

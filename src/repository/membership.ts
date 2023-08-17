@@ -1,7 +1,7 @@
 import { Membership, Prisma, PrismaClient } from '@prisma/client';
-import ServiceError from '../core/ServiceError.js';
+import RepositoryError from './RepositoryError.js';
 
-class MembershipService {
+class MembershipRepository {
   private readonly prisma;
 
   constructor(prismaClient: PrismaClient) {
@@ -22,7 +22,7 @@ class MembershipService {
     });
 
     if (!data) {
-      throw ServiceError.notFound(
+      throw RepositoryError.notFound(
         `Person with id ${personId} is not a member of group with id ${groupId}`
       );
     }
@@ -54,12 +54,12 @@ class MembershipService {
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2002') {
-          throw ServiceError.conflict(
+          throw RepositoryError.alreadyExists(
             `Person with id ${data.personId} is already a member of group with id ${data.groupId}`
           );
         }
         if (e.code === 'P2025') {
-          throw ServiceError.notFound(
+          throw RepositoryError.notFound(
             `There is no person with id ${data.personId}, or there is no group with id ${data.groupId}`
           );
         }
@@ -87,7 +87,7 @@ class MembershipService {
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError)
         if (e.code === 'P2025') {
-          throw ServiceError.notFound(
+          throw RepositoryError.notFound(
             `Person with id ${personId} is not a member of group with id ${groupId}`
           );
         }
@@ -122,4 +122,4 @@ class MembershipService {
   }
 }
 
-export default MembershipService;
+export default MembershipRepository;

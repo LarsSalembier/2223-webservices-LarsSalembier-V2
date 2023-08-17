@@ -1,42 +1,41 @@
-import { Administrator, Prisma, PrismaClient } from '@prisma/client';
+import { Administrator } from '@prisma/client';
 import ServiceError from '../core/ServiceError.js';
+import AdministratorRepository from '../repository/administrator.js';
+import RepositoryError, {
+  RepositoryErrorType,
+} from '../repository/RepositoryError.js';
 
 class AdministratorService {
-  private readonly prisma;
+  private readonly administratorRepository;
 
-  constructor(prisma: PrismaClient) {
-    this.prisma = prisma;
+  constructor(administratorRepository: AdministratorRepository) {
+    this.administratorRepository = administratorRepository;
   }
 
   async getAll(): Promise<Administrator[]> {
-    return this.prisma.administrator.findMany();
+    return this.administratorRepository.getAll();
   }
 
   async getById(auth0id: string): Promise<Administrator> {
-    const data = await this.prisma.administrator.findUnique({
-      where: {
-        auth0id,
-      },
-    });
-
-    if (!data) {
-      throw ServiceError.notFound(
-        `There is no administrator with auth0id ${auth0id}`
-      );
+    try {
+      return await this.administratorRepository.getById(auth0id);
+    } catch (err) {
+      if (err instanceof RepositoryError) {
+        if (err.type === RepositoryErrorType.NOT_FOUND) {
+          throw ServiceError.notFound(err.message);
+        }
+      }
+      throw err;
     }
-
-    return data;
   }
 
   async create(data: Administrator): Promise<Administrator> {
     try {
-      return await this.prisma.administrator.create({ data });
+      return await this.administratorRepository.create(data);
     } catch (err) {
-      if (err instanceof Prisma.PrismaClientKnownRequestError) {
-        if (err.code === 'P2002') {
-          throw ServiceError.conflict(
-            `An administrator with auth0id ${data.auth0id} and/or username ${data.username} already exists`
-          );
+      if (err instanceof RepositoryError) {
+        if (err.type === RepositoryErrorType.ALREADY_EXISTS) {
+          throw ServiceError.conflict(err.message);
         }
       }
       throw err;
@@ -44,7 +43,7 @@ class AdministratorService {
   }
 
   async createMany(data: Administrator[]): Promise<Administrator[]> {
-    return Promise.all(data.map((entity) => this.create(entity)));
+    return this.administratorRepository.createMany(data);
   }
 
   async update(
@@ -52,23 +51,14 @@ class AdministratorService {
     data: Partial<Omit<Administrator, 'auth0id'>>
   ): Promise<Administrator> {
     try {
-      return await this.prisma.administrator.update({
-        where: {
-          auth0id,
-        },
-        data,
-      });
+      return await this.administratorRepository.update(auth0id, data);
     } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError) {
-        if (e.code === 'P2025') {
-          throw ServiceError.notFound(
-            `There is no administrator with auth0id ${auth0id}`
-          );
+      if (e instanceof RepositoryError) {
+        if (e.type === RepositoryErrorType.NOT_FOUND) {
+          throw ServiceError.notFound(e.message);
         }
-        if (e.code === 'P2002') {
-          throw ServiceError.conflict(
-            `That username (${data.username}) is already in use`
-          );
+        if (e.type === RepositoryErrorType.ALREADY_EXISTS) {
+          throw ServiceError.conflict(e.message);
         }
       }
       throw e;
@@ -77,38 +67,23 @@ class AdministratorService {
 
   async delete(auth0id: string): Promise<Administrator> {
     try {
-      return await this.prisma.administrator.delete({
-        where: {
-          auth0id,
-        },
-      });
+      return await this.administratorRepository.delete(auth0id);
     } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError)
-        if (e.code === 'P2025') {
-          throw ServiceError.notFound(
-            `There is no administrator with auth0id ${auth0id}`
-          );
+      if (e instanceof RepositoryError) {
+        if (e.type === RepositoryErrorType.NOT_FOUND) {
+          throw ServiceError.notFound(e.message);
         }
+      }
       throw e;
     }
   }
 
   async deleteMany(auth0ids: string[]): Promise<number> {
-    const batchPayload = await this.prisma.administrator.deleteMany({
-      where: {
-        auth0id: {
-          in: auth0ids,
-        },
-      },
-    });
-
-    return batchPayload.count;
+    return this.administratorRepository.deleteMany(auth0ids);
   }
 
   async deleteAll(): Promise<number> {
-    const batchPayload = await this.prisma.administrator.deleteMany();
-
-    return batchPayload.count;
+    return this.administratorRepository.deleteAll();
   }
 }
 

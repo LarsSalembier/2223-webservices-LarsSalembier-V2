@@ -1,5 +1,5 @@
 import { Membership } from '@prisma/client';
-import MembershipService from '../service/membership.js';
+import PersonService from '../service/person.js';
 
 function shuffle<T>(array: T[]): T[] {
   const shuffled = array.reduce(
@@ -17,10 +17,10 @@ function shuffle<T>(array: T[]): T[] {
 }
 
 class MembershipSeeder {
-  private readonly service: MembershipService;
+  private readonly personService;
 
-  constructor(service: MembershipService) {
-    this.service = service;
+  constructor(personService: PersonService) {
+    this.personService = personService;
   }
 
   public static generate(personId: number, groupId: number): Membership {
@@ -30,11 +30,11 @@ class MembershipSeeder {
     };
   }
 
-  private add(personId: number, groupId: number): Promise<Membership> {
-    return this.service.create(MembershipSeeder.generate(personId, groupId));
+  private add(personId: number, groupId: number) {
+    this.personService.joinGroup(personId, groupId);
   }
 
-  async run(personIds: number[], groupIds: number[]): Promise<Membership[]> {
+  async run(personIds: number[], groupIds: number[]) {
     const shuffledPersonIds = shuffle(personIds);
     const shuffledGroupIds = shuffle(groupIds);
 
@@ -61,7 +61,7 @@ class MembershipSeeder {
       this.add(pair.personId, pair.groupId)
     );
 
-    return Promise.all(promises);
+    await Promise.all(promises);
   }
 }
 

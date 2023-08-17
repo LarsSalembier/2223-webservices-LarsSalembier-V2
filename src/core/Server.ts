@@ -12,6 +12,7 @@ import CustomPrismaClient from './CustomPrismaClient.js';
 import RequestLogger from './RequestLogger.js';
 import ErrorHandler from './ErrorHandler.js';
 import Auth from './Auth.js';
+import Repository from '../repository/Repository.js';
 
 class Server {
   private readonly port: number;
@@ -25,6 +26,8 @@ class Server {
   private readonly seederLogger: CustomLogger;
 
   private readonly prisma: PrismaClient;
+
+  private readonly repository: Repository;
 
   private readonly service: Service;
 
@@ -54,8 +57,11 @@ class Server {
     // setup prisma client
     this.prisma = new CustomPrismaClient(this.prismaLogger);
 
+    // setup repository
+    this.repository = new Repository(this.prisma);
+
     // setup service
-    this.service = new Service(this.prisma);
+    this.service = new Service(this.repository);
 
     // setup error handler
     this.errorHandler = new ErrorHandler(this.serverLogger);

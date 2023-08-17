@@ -18,7 +18,7 @@ const AMOUNT_OF_PEOPLE = 5;
 
 export const PEOPLE_PATH = '/api/people';
 
-const server = new Server(9000);
+const server = new Server(9003);
 
 const sortPeople = (a: Omit<Person, 'id'>, b: Omit<Person, 'id'>) => {
   if (a.name < b.name) return -1;

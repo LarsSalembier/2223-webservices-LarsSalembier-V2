@@ -9,7 +9,7 @@ const AMOUNT_OF_GROUPS = 5;
 
 export const GROUPS_PATH = '/api/groups';
 
-const server = new Server(9000);
+const server = new Server(9002);
 
 const sortGroupsWithoutId = (a: Omit<Group, 'id'>, b: Omit<Group, 'id'>) => {
   return b.name.localeCompare(a.name);

@@ -1,53 +1,105 @@
-import { Group, Prisma, PrismaClient } from '@prisma/client';
+import { Group, Person } from '@prisma/client';
 import ServiceError from '../core/ServiceError.js';
+import GroupRepository from '../repository/group.js';
+import RepositoryError, {
+  RepositoryErrorType,
+} from '../repository/RepositoryError.js';
+import MembershipRepository from '../repository/membership.js';
+import PersonRepository from '../repository/person.js';
 
 class GroupService {
-  private readonly prisma;
+  private readonly groupRepository;
 
-  constructor(prismaClient: PrismaClient) {
-    this.prisma = prismaClient;
+  private readonly membershipRepository;
+
+  private readonly personRepository;
+
+  constructor(
+    groupRepository: GroupRepository,
+    membershipRepository: MembershipRepository,
+    personRepository: PersonRepository
+  ) {
+    this.groupRepository = groupRepository;
+    this.membershipRepository = membershipRepository;
+    this.personRepository = personRepository;
   }
 
   async getAll(): Promise<Group[]> {
-    return this.prisma.group.findMany();
+    return this.groupRepository.getAll();
   }
 
   async getById(id: number): Promise<Group> {
-    const data = await this.prisma.group.findUnique({
-      where: {
-        id,
-      },
-    });
-
-    if (!data) {
-      throw ServiceError.notFound(`There is no group with id ${id}`);
+    try {
+      return await this.groupRepository.getById(id);
+    } catch (err) {
+      if (err instanceof RepositoryError) {
+        if (err.type === RepositoryErrorType.NOT_FOUND) {
+          throw ServiceError.notFound(err.message);
+        }
+      }
+      throw err;
     }
+  }
 
-    return data;
+  async getMembers(id: number): Promise<Person[]> {
+    // check if group exists
+    await this.getById(id);
+
+    const memberships = await this.membershipRepository.getByGroupId(id);
+
+    return Promise.all(
+      memberships.map(async (membership) => {
+        return this.personRepository.getById(membership.personId);
+      })
+    );
   }
 
   async create(data: Omit<Group, 'id'>): Promise<Group> {
-    return this.prisma.group.create({
-      data,
-    });
+    return this.groupRepository.create(data);
+  }
+
+  async addMember(id: number, personId: number): Promise<void> {
+    // check if group exists
+    await this.getById(id);
+
+    // check if person exists
+    try {
+      await this.personRepository.getById(personId);
+    } catch (e) {
+      if (e instanceof RepositoryError) {
+        if (e.type === RepositoryErrorType.NOT_FOUND) {
+          throw ServiceError.notFound(e.message);
+        }
+      }
+      throw e;
+    }
+
+    try {
+      await this.membershipRepository.create({
+        groupId: id,
+        personId,
+      });
+    } catch (e) {
+      if (e instanceof RepositoryError) {
+        if (e.type === RepositoryErrorType.ALREADY_EXISTS) {
+          throw ServiceError.conflict(e.message);
+        }
+      }
+      throw e;
+    }
   }
 
   async createMany(data: Omit<Group, 'id'>[]): Promise<Group[]> {
-    return Promise.all(data.map((entity) => this.create(entity)));
+    return this.groupRepository.createMany(data);
   }
 
   async update(id: number, data: Partial<Omit<Group, 'id'>>): Promise<Group> {
     try {
-      return await this.prisma.group.update({
-        where: {
-          id,
-        },
-        data,
-      });
+      return await this.groupRepository.update(id, data);
     } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError) {
-        if (e.code === 'P2025') {
-          throw ServiceError.notFound(`There is no group with id ${id}`);
+      if (e instanceof RepositoryError) {
+        if (e.type === RepositoryErrorType.NOT_FOUND) {
+          throw ServiceError.notFound(e.message);
         }
       }
       throw e;
@@ -55,37 +107,72 @@ class GroupService {
   }
 
   async delete(id: number): Promise<Group> {
+    // remove all memberships
+    await this.membershipRepository.deleteByGroupId(id);
+
     try {
-      return await this.prisma.group.delete({
-        where: {
-          id,
-        },
-      });
+      return await this.groupRepository.delete(id);
     } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError)
-        if (e.code === 'P2025') {
-          throw ServiceError.notFound(`There is no group with id ${id}`);
+      if (e instanceof RepositoryError) {
+        if (e.type === RepositoryErrorType.NOT_FOUND) {
+          throw ServiceError.notFound(e.message);
         }
+      }
       throw e;
     }
   }
 
   async deleteMany(ids: number[]): Promise<number> {
-    const batchPayload = await this.prisma.group.deleteMany({
-      where: {
-        id: {
-          in: ids,
-        },
-      },
-    });
+    // remove all memberships
+    await Promise.all(
+      ids.map(async (id) => {
+        await this.membershipRepository.deleteByGroupId(id);
+      })
+    );
 
-    return batchPayload.count;
+    return this.groupRepository.deleteMany(ids);
   }
 
   async deleteAll(): Promise<number> {
-    const batchPayload = await this.prisma.group.deleteMany({});
+    // remove all memberships
+    await this.membershipRepository.deleteAll();
 
-    return batchPayload.count;
+    return this.groupRepository.deleteAll();
+  }
+
+  async removeMember(id: number, memberId: number): Promise<void> {
+    // check if group exists
+    await this.getById(id);
+
+    // check if person exists
+    try {
+      await this.personRepository.getById(memberId);
+    } catch (e) {
+      if (e instanceof RepositoryError) {
+        if (e.type === RepositoryErrorType.NOT_FOUND) {
+          throw ServiceError.notFound(e.message);
+        }
+      }
+      throw e;
+    }
+
+    try {
+      await this.membershipRepository.delete(memberId, id);
+    } catch (e) {
+      if (e instanceof RepositoryError) {
+        if (e.type === RepositoryErrorType.NOT_FOUND) {
+          throw ServiceError.notFound(e.message);
+        }
+      }
+      throw e;
+    }
+  }
+
+  async removeAllMembers(groupId: number): Promise<void> {
+    // check if group exists
+    await this.getById(groupId);
+
+    await this.membershipRepository.deleteByGroupId(groupId);
   }
 }
 

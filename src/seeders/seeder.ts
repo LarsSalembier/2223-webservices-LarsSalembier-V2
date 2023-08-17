@@ -26,13 +26,10 @@ class Seeder {
       this.service.administratorService
     );
     this.groupSeeder = new GroupSeeder(this.service.groupService);
-    this.membershipSeeder = new MembershipSeeder(
-      this.service.membershipService
-    );
+    this.membershipSeeder = new MembershipSeeder(this.service.personService);
   }
 
   public async clearDb() {
-    await this.service.membershipService.deleteAll();
     await this.service.groupService.deleteAll();
     await this.service.personService.deleteAll();
     await this.service.administratorService.deleteAll();
@@ -44,9 +41,9 @@ class Seeder {
       await this.administratorSeeder.run();
       const people = await this.personSeeder.run();
       const groups = await this.groupSeeder.run();
-      const personIds = people.map((person) => person.id);
-      const groupIds = groups.map((group) => group.id);
-      await this.membershipSeeder.run(personIds, groupIds);
+      const peopleIds = people.map((person) => person.id);
+      const groupsIds = groups.map((group) => group.id);
+      await this.membershipSeeder.run(peopleIds, groupsIds);
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error(error.message);
