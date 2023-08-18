@@ -327,7 +327,7 @@ Hopelijk kunnen mijn tests voor web services mijn tests voor front-end compenser
 
 Wanneer men niet is ingelogd, is het de bedoeling dat alle edit- en create-knoppen verdwijnen. In de plaats daarvan geeft auth0 deze cryptische error die na wat research en vele uren debuggen er niet uit raakt.
 
-![Alt text](https://gyazo.com/edf696fd761732d54441246bfb854e56)
+![Alt text](image-6.png)
 
 ### Web Services
 
