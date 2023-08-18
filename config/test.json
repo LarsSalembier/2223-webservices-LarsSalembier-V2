@@ -12,7 +12,8 @@
   },
 
   "database": {
-    "seed": false
+    "seed": false,
+    "seedFake": false
   },
 
   "port": 9000

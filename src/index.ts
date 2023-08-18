@@ -5,7 +5,7 @@ import Server from './core/Server.js';
 async function main() {
   try {
     const shouldSeed: boolean = config.get('database.seed');
-    const port: number = config.get('server.port');
+    const port: number = config.get('port');
 
     const server = new Server(port, shouldSeed);
     await server.start();

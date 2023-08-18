@@ -43,7 +43,9 @@ class Seeder {
       const groups = await this.groupSeeder.run();
       const peopleIds = people.map((person) => person.id);
       const groupsIds = groups.map((group) => group.id);
-      await this.membershipSeeder.run(peopleIds, groupsIds);
+      if (peopleIds.length === groupsIds.length) {
+        await this.membershipSeeder.run(peopleIds, groupsIds);
+      }
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error(error.message);
