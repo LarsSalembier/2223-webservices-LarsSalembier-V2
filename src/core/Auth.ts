@@ -8,10 +8,12 @@ import { ServiceErrorType } from '../service/ServiceError.js';
 
 const AUTH_USER_INFO: string = config.get('auth.userInfo');
 
-enum Permission {
+export enum Permission {
   READ_USER = 'read-user',
   READ_ADMIN = 'read-admin',
   WRITE_ADMIN = 'write-admin',
+  READ_WEBMASTER = 'read-webmaster',
+  WRITE_WEBMASTER = 'write-webmaster',
 }
 
 class Auth {
@@ -87,7 +89,7 @@ class Auth {
       const { user } = ctx.state;
 
       if (permission === Permission.READ_USER) {
-        // anyone can read user
+        // anyone can read user, no login required
         await next();
       } else if (
         user &&
@@ -100,7 +102,7 @@ class Auth {
           403,
           'You are not allowed to access this part of the application',
           {
-            code: ServiceErrorType.FORBIDDEN,
+            type: ServiceErrorType.FORBIDDEN,
           }
         );
       }

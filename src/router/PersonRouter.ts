@@ -4,6 +4,7 @@ import { Context } from 'koa';
 import PersonService from '../service/PersonService.js';
 import Validator from '../validation/Validator.js';
 import schemas from '../validation/personSchema.js';
+import Auth, { Permission } from '../core/Auth.js';
 
 const PATH = '/api/people';
 
@@ -31,42 +32,63 @@ class PersonRouter {
 
     router.get(
       `${PATH}/:id`,
+      Auth.hasPermission(Permission.READ_USER),
       Validator.validate(schemas.getById),
       this.getById
     );
 
     router.get(
       `${PATH}/:id/groups`,
+      Auth.hasPermission(Permission.READ_USER),
       Validator.validate(schemas.getGroups),
       this.getGroups
     );
 
-    router.post(PATH, Validator.validate(schemas.create), this.create);
+    router.post(
+      PATH,
+      Auth.hasPermission(Permission.WRITE_ADMIN),
+      Validator.validate(schemas.create),
+      this.create
+    );
 
     router.post(
       `${PATH}/:id/groups`,
+      Auth.hasPermission(Permission.WRITE_ADMIN),
       Validator.validate(schemas.joinGroup),
       this.joinGroup
     );
 
-    router.put(`${PATH}/:id`, Validator.validate(schemas.update), this.update);
+    router.put(
+      `${PATH}/:id`,
+      Auth.hasPermission(Permission.WRITE_ADMIN),
+      Validator.validate(schemas.update),
+      this.update
+    );
 
     router.delete(
       `${PATH}/:id`,
+      Auth.hasPermission(Permission.WRITE_ADMIN),
       Validator.validate(schemas.delete),
       this.delete
     );
 
-    router.delete(PATH, Validator.validate(schemas.deleteAll), this.deleteAll);
+    router.delete(
+      PATH,
+      Auth.hasPermission(Permission.WRITE_WEBMASTER),
+      Validator.validate(schemas.deleteAll),
+      this.deleteAll
+    );
 
     router.delete(
       `${PATH}/:id/groups/:groupId`,
+      Auth.hasPermission(Permission.WRITE_ADMIN),
       Validator.validate(schemas.leaveGroup),
       this.leaveGroup
     );
 
     router.delete(
       `${PATH}/:id/groups`,
+      Auth.hasPermission(Permission.WRITE_ADMIN),
       Validator.validate(schemas.leaveAllGroups),
       this.leaveAllGroups
     );

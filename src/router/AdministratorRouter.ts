@@ -4,6 +4,7 @@ import { Context } from 'koa';
 import Validator from '../validation/Validator.js';
 import schemas from '../validation/administratorSchema.js';
 import AdministratorService from '../service/AdministratorService.js';
+import Auth, { Permission } from '../core/Auth.js';
 
 const PATH = '/api/administrators';
 
@@ -23,29 +24,47 @@ class AdministratorRouter {
     this.delete = this.delete.bind(this);
     this.deleteAll = this.deleteAll.bind(this);
 
-    router.get(PATH, Validator.validate(schemas.getAll), this.getAll);
+    router.get(
+      PATH,
+      Auth.hasPermission(Permission.READ_WEBMASTER),
+      Validator.validate(schemas.getAll),
+      this.getAll
+    );
 
     router.get(
       `${PATH}/:auth0id`,
+      Auth.hasPermission(Permission.READ_WEBMASTER),
       Validator.validate(schemas.getById),
       this.getById
     );
 
-    router.post(PATH, Validator.validate(schemas.create), this.create);
+    router.post(
+      PATH,
+      Auth.hasPermission(Permission.WRITE_WEBMASTER),
+      Validator.validate(schemas.create),
+      this.create
+    );
 
     router.put(
       `${PATH}/:auth0id`,
+      Auth.hasPermission(Permission.WRITE_WEBMASTER),
       Validator.validate(schemas.update),
       this.update
     );
 
     router.delete(
       `${PATH}/:auth0id`,
+      Auth.hasPermission(Permission.WRITE_WEBMASTER),
       Validator.validate(schemas.delete),
       this.delete
     );
 
-    router.delete(PATH, Validator.validate(schemas.deleteAll), this.deleteAll);
+    router.delete(
+      PATH,
+      Auth.hasPermission(Permission.WRITE_WEBMASTER),
+      Validator.validate(schemas.deleteAll),
+      this.deleteAll
+    );
   }
 
   async getAll(ctx: Context) {

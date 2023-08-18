@@ -4,6 +4,7 @@ import { Context } from 'koa';
 import Validator from '../validation/Validator.js';
 import schemas from '../validation/groupSchema.js';
 import GroupService from '../service/GroupService.js';
+import Auth, { Permission } from '../core/Auth.js';
 
 const PATH = '/api/groups';
 
@@ -31,42 +32,63 @@ class GroupRouter {
 
     router.get(
       `${PATH}/:id`,
+      Auth.hasPermission(Permission.READ_USER),
       Validator.validate(schemas.getById),
       this.getById
     );
 
     router.get(
       `${PATH}/:id/members`,
+      Auth.hasPermission(Permission.READ_USER),
       Validator.validate(schemas.getMembers),
       this.getMembers
     );
 
-    router.post(PATH, Validator.validate(schemas.create), this.create);
+    router.post(
+      PATH,
+      Auth.hasPermission(Permission.WRITE_ADMIN),
+      Validator.validate(schemas.create),
+      this.create
+    );
 
     router.post(
       `${PATH}/:id/members`,
+      Auth.hasPermission(Permission.WRITE_ADMIN),
       Validator.validate(schemas.addMember),
       this.addMember
     );
 
-    router.put(`${PATH}/:id`, Validator.validate(schemas.update), this.update);
+    router.put(
+      `${PATH}/:id`,
+      Auth.hasPermission(Permission.WRITE_ADMIN),
+      Validator.validate(schemas.update),
+      this.update
+    );
 
     router.delete(
       `${PATH}/:id`,
+      Auth.hasPermission(Permission.WRITE_ADMIN),
       Validator.validate(schemas.delete),
       this.delete
     );
 
-    router.delete(PATH, Validator.validate(schemas.deleteAll), this.deleteAll);
+    router.delete(
+      PATH,
+      Auth.hasPermission(Permission.WRITE_WEBMASTER),
+      Validator.validate(schemas.deleteAll),
+      this.deleteAll
+    );
 
     router.delete(
       `${PATH}/:id/members/:memberId`,
+      Auth.hasPermission(Permission.WRITE_ADMIN),
       Validator.validate(schemas.removeMember),
       this.removeMember
     );
 
     router.delete(
       `${PATH}/:id/members`,
+      Auth.hasPermission(Permission.WRITE_ADMIN),
       Validator.validate(schemas.removeAllMembers),
       this.removeAllMembers
     );

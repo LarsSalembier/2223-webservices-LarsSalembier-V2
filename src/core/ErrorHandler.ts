@@ -47,7 +47,7 @@ class ErrorHandler {
 
       this.logger.error(`Error occured while handling a request: ${safeError}`);
       this.logger.error(
-        `Error type: ${safeError.status ? '' : `${safeError.status} `}${
+        `type: ${safeError.status ? '' : `${safeError.status} `}${
           safeError.type
         }`
       );
@@ -85,10 +85,17 @@ class ErrorHandler {
           default:
             statusCode = 500;
         }
-
-        ctx.status = statusCode;
-        ctx.body = errorBody;
       }
+
+      if (ctx.state.jwtOriginalError) {
+        statusCode = 401;
+        errorBody.type = ServiceErrorType.UNAUTHORIZED;
+        errorBody.message = ctx.state.jwtOriginalError.message;
+        errorBody.details.jwtOriginalError = ctx.state.jwtOriginalError;
+      }
+
+      ctx.status = statusCode;
+      ctx.body = errorBody;
     }
   }
 }
