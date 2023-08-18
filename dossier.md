@@ -1,4 +1,4 @@
-# Lars Salembier (Studentennummer)
+# Lars Salembier (202293794)
 
 - [x] Front-end Web Development
       BELANGRIJK: IS NIET MEER OP OORSPRONKELIJKE REPOSITORY (ik ben opnieuw begonnen van een schone lei)
@@ -13,8 +13,6 @@
 
 - Gebruikersnaam/e-mailadres: admin123@gmail.com
 - Wachtwoord: admin123@gmail.com
-
-> Vul eventueel aan met extra accounts voor administrators of andere rollen.
 
 ## Projectbeschrijving
 
@@ -100,8 +98,6 @@ We gaan een detailpagina van de groep 'Rakwi's' bekijken. Hier kan je vervolgens
 ![Alt text](image-5.png)
 
 ## Behaalde minimumvereisten
-
-> Duid per vak aan welke minimumvereisten je denkt behaald te hebben
 
 ### Front-end Web Development
 
